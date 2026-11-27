@@ -9,8 +9,9 @@ that is rolled back.
 import random
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import pytest
 from alembic import command
@@ -81,7 +82,7 @@ def app(settings: Settings) -> Iterator[FastAPI]:
     application = create_app(settings)
     application.state.rng = FixedRandom(0.99)
     with Session(application.state.engine) as session:  # policy v1 committed once per run
-        policy_service(session, AuditService(session)).ensure_seeded()
+        policy_service(session, AuditService(session)).ensure_reference_data()
         session.commit()
     yield application
     application.state.engine.dispose()
@@ -136,13 +137,16 @@ def client(app: FastAPI, db_session: Session) -> Iterator[TestClient]:
 class People:
     department_id: str
     other_department_id: str
+    tier1_city: str
+    tier2_city: str
     head: str  # finance head (admin), top of the org
     auditor: str  # finance auditor, reports to head
     auditor2: str
     manager: str  # line manager, reports to head
+    manager2: str  # another line manager (delegation target), reports to head
     employee: str  # reports to manager
     peer: str  # reports to manager
-    outsider: str  # reports to head, other department
+    outsider: str  # reports to manager2, other department
 
 
 TEST_PASSWORD = "correct horse battery staple"
@@ -158,11 +162,13 @@ def people(db_session: Session, password_hash: str) -> People:
     org = org_service(db_session)
     dept = org.create_department("ENG", "Engineering")
     other = org.create_department("SAL", "Sales")
+    tier1 = org.create_city("Testpur", 1)
+    tier2 = org.create_city("Smalltown", 2)
     counter = iter(range(1, 100))
 
     def user(name: str, role: str, manager: str | None, department: str = dept) -> str:
         n = next(counter)
-        return org.create_user(
+        user_id = org.create_user(
             email=f"{name}@example.test",
             full_name=name.capitalize() + " Person",
             employee_code=f"T{n:04d}",
@@ -170,19 +176,33 @@ def people(db_session: Session, password_hash: str) -> People:
             department_id=department,
             manager_id=manager,
             password_hash=password_hash,
-            bank_account=f"00011122{n:04d}",
-            ifsc="HDFC0001234",
             is_active=True,
         )
+        org.set_bank_account(user_id, f"00011122{n:04d}", "MOCK0001234", name.capitalize())
+        return user_id
 
-    head = user("head", "finance_head", None)
-    auditor = user("auditor", "finance_auditor", head)
-    auditor2 = user("auditor2", "finance_auditor", head)
-    manager = user("manager", "employee", head)
-    employee = user("employee", "employee", manager)
-    peer = user("peer", "employee", manager)
-    outsider = user("outsider", "employee", head, other)
-    return People(dept, other, head, auditor, auditor2, manager, employee, peer, outsider)
+    head = user("head", "FINANCE_HEAD", None)
+    auditor = user("auditor", "AUDITOR", head)
+    auditor2 = user("auditor2", "AUDITOR", head)
+    manager = user("manager", "MANAGER", head)
+    manager2 = user("manager2", "MANAGER", head)
+    employee = user("employee", "EMPLOYEE", manager)
+    peer = user("peer", "EMPLOYEE", manager)
+    outsider = user("outsider", "EMPLOYEE", manager2, other)
+    return People(
+        dept,
+        other,
+        tier1,
+        tier2,
+        head,
+        auditor,
+        auditor2,
+        manager,
+        manager2,
+        employee,
+        peer,
+        outsider,
+    )
 
 
 @pytest.fixture
@@ -203,3 +223,93 @@ class AsUser:
             user_id, "access", secret=self._secret, ttl=timedelta(minutes=5), extra={"role": role}
         )
         return {"Authorization": f"Bearer {token}"}
+
+
+# ---------------------------------------------------------------------- API helper
+FIXED_NOW = datetime(2026, 11, 27, 6, 0, tzinfo=UTC)  # a Friday, 11:30 in Asia/Kolkata
+WEEKDAY = "2026-11-25"  # a Wednesday: never trips WEEKEND_SPEND
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+
+
+@pytest.fixture
+def fixed_clock(app: FastAPI) -> Iterator[datetime]:
+    """Pin the service clock so date rules (future dates, IST day) are deterministic."""
+    app.state.clock = lambda: FIXED_NOW
+    try:
+        yield FIXED_NOW
+    finally:
+        del app.state.clock
+
+
+class Api:
+    """Small façade over the HTTP API for readable integration tests."""
+
+    def __init__(self, client: TestClient, as_user: "AsUser") -> None:
+        self.client = client
+        self.as_user = as_user
+        self._receipt_n = 0
+
+    def get(self, user: str, path: str, **kw: Any) -> Any:
+        return self.client.get(f"/api/v1{path}", headers=self.as_user(user), **kw)
+
+    def post(self, user: str, path: str, body: Any = None, **kw: Any) -> Any:
+        return self.client.post(f"/api/v1{path}", headers=self.as_user(user), json=body, **kw)
+
+    def receipt(self, user: str, content: bytes | None = None) -> str:
+        self._receipt_n += 1
+        data = content or PNG_MAGIC + f"receipt-{self._receipt_n}-{user}".encode()
+        r = self.client.post(
+            "/api/v1/receipts",
+            headers=self.as_user(user),
+            files={"file": ("r.png", data, "image/png")},
+        )
+        assert r.status_code == 201, r.text
+        return str(r.json()["id"])
+
+    def line(self, user: str, amount_paise: int, **overrides: Any) -> dict[str, Any]:
+        self._receipt_n += 1
+        line: dict[str, Any] = {
+            "category": "OTHER",
+            "description": "Test expense",
+            "vendor": f"Vendor {self._receipt_n}",
+            "amount_paise": amount_paise,
+            "expense_date": WEEKDAY,
+        }
+        if amount_paise > 50_000 and "receipt_id" not in overrides:
+            line["receipt_id"] = self.receipt(user)
+        line.update(overrides)
+        return line
+
+    def draft(self, user: str, *lines: dict[str, Any], title: str = "Trip") -> dict[str, Any]:
+        r = self.post(user, "/claims", {"title": title, "lines": list(lines)})
+        assert r.status_code == 201, r.text
+        return dict(r.json())
+
+    def submit(self, user: str, claim: dict[str, Any]) -> dict[str, Any]:
+        r = self.post(user, f"/claims/{claim['id']}/submit", {"expected_version": claim["version"]})
+        assert r.status_code == 200, r.text
+        return dict(r.json())
+
+    def claim(self, user: str, *amounts: int, **line_overrides: Any) -> dict[str, Any]:
+        """Create and submit a claim with one OTHER line per amount (receipts attached)."""
+        return self.submit(
+            user, self.draft(user, *(self.line(user, a, **line_overrides) for a in amounts))
+        )
+
+    def act(self, user: str, claim: dict[str, Any], decision: str = "approve", **body: Any) -> Any:
+        step = claim["current_step"]["id"]
+        return self.post(
+            user,
+            f"/approvals/{step}/{decision}",
+            {"expected_version": claim["version"], **body},
+        )
+
+    def approve(self, user: str, claim: dict[str, Any]) -> dict[str, Any]:
+        r = self.act(user, claim)
+        assert r.status_code == 200, r.text
+        return dict(r.json())
+
+
+@pytest.fixture
+def api(client: TestClient, as_user: AsUser, fixed_clock: datetime) -> Api:
+    return Api(client, as_user)

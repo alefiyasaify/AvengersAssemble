@@ -104,7 +104,9 @@ class AuthService:
         if not (verify_password(password, password_hash) and is_active):
             return self._fail(account, user_id)
         self._guard.succeeded(account)
-        self._audit.record(actor_id=user_id, action="auth.login", entity_type="user", entity_id=user_id)
+        self._audit.record(
+            actor_id=user_id, action="auth.login", entity_type="user", entity_id=user_id
+        )
         return LoginResult(user_id, self._issue(user_id, role), None)
 
     def _fail(self, account: str, user_id: str | None) -> LoginResult:

@@ -5,8 +5,8 @@ from collections.abc import Collection
 from dataclasses import dataclass
 from datetime import date, datetime
 
-from sqlalchemy import Select, func, or_, select, update
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import ColumnElement, Select, func, or_, select, update
+from sqlalchemy.orm import Session, SessionTransaction, selectinload
 
 from app.modules.claims.models import (
     ApprovalStep,
@@ -37,7 +37,20 @@ class ClaimFilter:
     q: str | None = None
 
 
-def _eager(stmt: Select[tuple[Claim]]) -> Select[tuple[Claim]]:
+def _range_conditions(f: ClaimFilter) -> list[ColumnElement[bool]]:
+    conditions: list[ColumnElement[bool]] = []
+    if f.min_payable_paise is not None:
+        conditions.append(Claim.payable_paise >= f.min_payable_paise)
+    if f.max_payable_paise is not None:
+        conditions.append(Claim.payable_paise <= f.max_payable_paise)
+    if f.submitted_from is not None:
+        conditions.append(Claim.submitted_at >= f.submitted_from)
+    if f.submitted_to is not None:
+        conditions.append(Claim.submitted_at <= f.submitted_to)
+    return conditions
+
+
+def _eager(stmt: Select[Claim]) -> Select[Claim]:
     return stmt.options(
         selectinload(Claim.lines).selectinload(ClaimLine.findings),
         selectinload(Claim.steps),
@@ -50,12 +63,16 @@ class ClaimsRepository:
 
     # ------------------------------------------------------------------ claims
     def get(self, claim_id: str) -> Claim | None:
-        return self._session.execute(_eager(select(Claim).where(Claim.id == claim_id))).scalar_one_or_none()
+        return self._session.execute(
+            _eager(select(Claim).where(Claim.id == claim_id))
+        ).scalar_one_or_none()
 
     def get_many(self, claim_ids: Collection[str]) -> list[Claim]:
         if not claim_ids:
             return []
-        return list(self._session.execute(_eager(select(Claim).where(Claim.id.in_(claim_ids)))).scalars())
+        return list(
+            self._session.execute(_eager(select(Claim).where(Claim.id.in_(claim_ids)))).scalars()
+        )
 
     def add(self, claim: Claim) -> Claim:
         self._session.add(claim)
@@ -64,6 +81,23 @@ class ClaimsRepository:
 
     def flush(self) -> None:
         self._session.flush()
+
+    def savepoint(self) -> SessionTransaction:
+        """Nested transaction so one bulk item can fail without undoing the others."""
+        return self._session.begin_nested()
+
+    def claims_with_receipt(self, receipt_id: str) -> list[Claim]:
+        return list(
+            self._session.execute(
+                _eager(
+                    select(Claim).where(
+                        Claim.id.in_(
+                            select(ClaimLine.claim_id).where(ClaimLine.receipt_id == receipt_id)
+                        )
+                    )
+                )
+            ).scalars()
+        )
 
     def refresh(self, claim: Claim) -> None:
         self._session.refresh(claim)
@@ -85,30 +119,25 @@ class ClaimsRepository:
         )
         return bool(getattr(result, "rowcount", 0) == 1)
 
-    def _filtered(self, f: ClaimFilter) -> Select[tuple[Claim]]:
-        stmt = select(Claim)
+    def _filtered(self, f: ClaimFilter) -> Select[Claim]:
+        conditions: list[ColumnElement[bool]] = []
         if f.owner_ids is not None:
-            stmt = stmt.where(Claim.owner_id.in_(f.owner_ids))
+            conditions.append(Claim.owner_id.in_(f.owner_ids))
         if f.statuses:
-            stmt = stmt.where(Claim.status.in_(f.statuses))
+            conditions.append(Claim.status.in_(f.statuses))
         if f.claim_ids is not None:
-            stmt = stmt.where(Claim.id.in_(f.claim_ids))
+            conditions.append(Claim.id.in_(f.claim_ids))
         if f.department_id:
-            stmt = stmt.where(Claim.department_id == f.department_id)
-        if f.min_payable_paise is not None:
-            stmt = stmt.where(Claim.payable_paise >= f.min_payable_paise)
-        if f.max_payable_paise is not None:
-            stmt = stmt.where(Claim.payable_paise <= f.max_payable_paise)
-        if f.submitted_from is not None:
-            stmt = stmt.where(Claim.submitted_at >= f.submitted_from)
-        if f.submitted_to is not None:
-            stmt = stmt.where(Claim.submitted_at <= f.submitted_to)
+            conditions.append(Claim.department_id == f.department_id)
+        conditions += _range_conditions(f)
         if f.category:
-            stmt = stmt.where(
-                Claim.id.in_(select(ClaimLine.claim_id).where(ClaimLine.category_code == f.category))
+            conditions.append(
+                Claim.id.in_(
+                    select(ClaimLine.claim_id).where(ClaimLine.category_code == f.category)
+                )
             )
         if f.rule_code:
-            stmt = stmt.where(
+            conditions.append(
                 Claim.id.in_(
                     select(ClaimLine.claim_id)
                     .join(LineFinding, LineFinding.line_id == ClaimLine.id)
@@ -117,20 +146,26 @@ class ClaimsRepository:
             )
         if f.q:
             like = f"%{f.q.strip().lower()}%"
-            stmt = stmt.where(or_(func.lower(Claim.title).like(like), func.lower(Claim.number).like(like)))
-        return stmt
+            conditions.append(
+                or_(func.lower(Claim.title).like(like), func.lower(Claim.number).like(like))
+            )
+        return select(Claim).where(*conditions)
 
     def page(
         self, f: ClaimFilter, *, limit: int, offset: int, oldest_first: bool = False
     ) -> tuple[list[Claim], int]:
         stmt = self._filtered(f)
-        total = self._session.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+        total = self._session.execute(
+            select(func.count()).select_from(stmt.subquery())
+        ).scalar_one()
         order = (
             (Claim.submitted_at.asc(), Claim.id)
             if oldest_first
             else (Claim.updated_at.desc(), Claim.id)
         )
-        rows = self._session.execute(_eager(stmt.order_by(*order).limit(limit).offset(offset))).scalars()
+        rows = self._session.execute(
+            _eager(stmt.order_by(*order).limit(limit).offset(offset))
+        ).scalars()
         return list(rows), total
 
     # ------------------------------------------------------------------ policy context lookups
@@ -140,7 +175,9 @@ class ClaimsRepository:
         if not dates:
             return {}
         rows = self._session.execute(
-            select(ClaimLine.category_code, ClaimLine.expense_date, func.sum(ClaimLine.amount_paise))
+            select(
+                ClaimLine.category_code, ClaimLine.expense_date, func.sum(ClaimLine.amount_paise)
+            )
             .join(Claim, Claim.id == ClaimLine.claim_id)
             .where(
                 ClaimLine.owner_id == owner_id,
@@ -289,7 +326,9 @@ class ClaimsRepository:
         stmt = select(SampleAudit)
         if status:
             stmt = stmt.where(SampleAudit.status == status)
-        total = self._session.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+        total = self._session.execute(
+            select(func.count()).select_from(stmt.subquery())
+        ).scalar_one()
         rows = self._session.execute(
             stmt.order_by(SampleAudit.selected_at, SampleAudit.id).limit(limit).offset(offset)
         ).scalars()
@@ -337,7 +376,12 @@ class ClaimsRepository:
     ) -> list[tuple[str, str, date, int]]:
         """(claim department snapshot, category, expense_date, amount) of approved spend."""
         stmt = (
-            select(Claim.department_id, ClaimLine.category_code, ClaimLine.expense_date, ClaimLine.amount_paise)
+            select(
+                Claim.department_id,
+                ClaimLine.category_code,
+                ClaimLine.expense_date,
+                ClaimLine.amount_paise,
+            )
             .join(Claim, Claim.id == ClaimLine.claim_id)
             .where(
                 Claim.status.in_(("APPROVED", "PAID")),

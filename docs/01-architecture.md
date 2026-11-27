@@ -54,7 +54,17 @@ features/<name>/
 ## Current modules and features
 | Side | Name | Purpose | Public interface |
 |---|---|---|---|
-| Backend | `modules/health` | liveness, readiness (DB check), version | `health.service` (`HealthService`, `VersionService`) |
+| Backend | `modules/health` | liveness, readiness (DB check), version; `/healthz`, `/readyz` at the root | `health.service` (`HealthService`, `VersionService`) |
+| Backend | `modules/auth` | login, refresh, logout; cookie JWT + CSRF; lockout | `auth.service` |
+| Backend | `modules/org` | departments, users and hierarchy, cities, categories, bank accounts, `/me` | `org.service` (`OrgService`, `org_service()`) |
+| Backend | `modules/audit` | append-only, hash-chained `audit_events` | `audit.service` (`AuditService`) |
+| Backend | `modules/policy` | versioned rules, approval levels, app config; the pure engine | `policy.service`, `policy.engine` |
+| Backend | `modules/receipts` | upload (magic bytes, 5 MB, SHA-256), storage interface | `receipts.service` |
+| Backend | `modules/claims` | claims, lines, state machine, approval chain, delegation, sample audit; owns the claim tables | `claims.service` (`ClaimsService`, `claims_service()`) |
+| Backend | `modules/approvals` | HTTP surface for approvers (inbox, decisions, delegations, review queue, bulk, sample audits); facade over `claims.service` | `approvals.service` |
+| Backend | `modules/payouts` | maker-checker batches and the mock bank CSV | `payouts.service` (`payouts_service()`) |
+| Backend | `modules/reports` | role-scoped dashboard summary | `reports.service` |
+| Backend | `app/seeds` | deterministic demo seed (`make seed`) via the services above | `python -m app.seeds.generate` |
 | Backend | `modules/_template` | copy-me skeleton (not registered) | - |
 | Frontend | `features/system-status` | shows API/DB status and version | `features/system-status/index.ts` (`SystemStatusCard`, hooks) |
 | Frontend | `features/_template` | copy-me skeleton (not imported) | - |

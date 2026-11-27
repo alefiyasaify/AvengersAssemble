@@ -53,3 +53,43 @@ camera input, client-side downscale to 1600 px, Indian number grouping, 2 s auto
 review, payouts, dashboard, admin`.
 
 Table names stay plural `snake_case` (docs/03); ARD section 7 names map one-to-one (`claim` -> `claims`).
+
+## E. Status after A-0007 (backend re-alignment, 2026-11-27)
+Section B rows, as built and tested in `backend/` (168 tests, coverage 86.97%):
+
+| Area | Status | Where |
+|---|---|---|
+| Claim states, 16 transitions, `claim_transitions` trigger | Done; trigger checked by a test | `claims/state.py`, migration `0f946151ac98` |
+| Line outcome, payable excludes rejected lines | Done | `policy/engine.py`, `claims/service.py` |
+| Limit rules REJECT / duplicate ROUTE+force AUDITOR / weekend FLAG / SPLIT_SUSPECT / CLAIM_AGE_LIMIT inactive | Done | `seeds/reference_data.json`, engine |
+| Policy storage (versions, rule rows, approval levels, app_config, city, category) | Done | `policy/` |
+| Asia/Kolkata day and weekend | Done (`tzdata` dependency added for Windows/slim images) | `claims/service.py` |
+| Chain: frozen `required_levels`, one open step, SUPERSEDED, escalation | Done | `claims/chain.py`, `claims/service.py` |
+| Delegation: per level, max 30 days, one active, same-or-higher role, not the claimant | Done | `claims/chain.py` |
+| Sample audit table, CSPRNG draw audited, FAILED reopens at auditor | Done | `claims/service.py` |
+| Bulk approve rules (auditor level, max 50, SKIPPED reasons) | Done | `claims/service.py` |
+| Payout maker-checker, ARD CSV, SHA-256, cancel | Done | `payouts/` |
+| Audit hash chain + verifier | Done (verifier is `AuditService.verify_chain`; nightly job and metric are P3-08) | `audit/` |
+| Roles and team visibility | Done | `claims/service.py` |
+| API (ARD section 8 list, `expected_version`, `allowed_actions`) | Done except `Idempotency-Key` (AI-013) | routers |
+| Dashboard (role scope, p90, sample counts, violation rate) | Done; 166 ms on the seeded 3,016 claims (target 500 ms) | `reports/` |
+| Seed + `seed_manifest.json` + `make seed` | Done; 383/383 planted cases detected | `app/seeds/generate.py` |
+| `/healthz`, `/readyz` (G5) | Done; `/metrics` is P3-08 | `health/router.py` |
+
+### Rules decided where the ARD is silent (need team sign-off)
+| # | Topic | Built behaviour | Why |
+|---|---|---|---|
+| E1 | Mixed claim: one line AUTO_REJECTED, others clean | Goes to the manager for the payable amount; not auto-approved | ARD 5 rule 4 auto-approves only when **all** lines are auto-approved |
+| E2 | Meals cap across several lines | Lines summed in order (earlier claims first); only the line that crosses 1,500/day is rejected; rejected lines do not count | Matches the test plan's assumption |
+| E3 | Vendor normalisation | Case-insensitive, trimmed, inner whitespace collapsed | ARD 5 says case-insensitive and trimmed; collapsing spaces stops trivial evasion (C6) |
+| E4 | Duplicate / split lookback | Submitted, non-rejected lines only; other people's drafts are ignored | A draft is not a claim yet |
+| E5 | Finance head's own claim, or head level after the head approved level 1 | Assigned to the head's active level-3 delegate; otherwise unassigned and an `approval.needs_reassignment` audit event; the head can `POST /approvals/{step_id}/reassign` (not on their own claim) | ARD has one head (decision 10) and gives no approver |
+| E6 | Who may cover the head level | An auditor or the head (exception to "same role") | With one head, nobody else could ever cover it |
+| E7 | Head acting on auditor-pool steps | Allowed (same-or-higher role); separation of duties still applies | Lets the head clear the queue and use bulk approve |
+| E8 | Bank file narration | Letters, digits, spaces **and hyphens**, max 30 | ARD's own sample narration is a claim number with hyphens |
+| E9 | Average approval time | Counts every chain decision (approved or rejected) from the last (re)submission | Resubmitting resets `submitted_at`, which removes SENT_BACK time as ARD 10 asks |
+
+### Still open
+- `Idempotency-Key` storage (24 h) is not implemented (AI-013).
+- The frontend's generated client is out of date with `openapi.json`; regenerate with `make gen-contract` in a frontend PR (AI-012, contract-change label).
+- `/metrics`, the nightly audit-chain job and alerts: P3-08.

@@ -261,7 +261,9 @@ class OrgService:
 
     def set_bank_account(self, employee_id: str, account_no: str, ifsc: str, holder: str) -> None:
         self._repo.upsert_bank_account(
-            BankAccount(employee_id=employee_id, account_no=account_no, ifsc=ifsc, holder_name=holder)
+            BankAccount(
+                employee_id=employee_id, account_no=account_no, ifsc=ifsc, holder_name=holder
+            )
         )
 
 

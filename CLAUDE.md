@@ -3,18 +3,17 @@
 ## Overview
 **ExpenseFlow** - expense claims with policy-driven approvals for a mid-size services company. Employees capture claims (line items + receipts) on phone or desktop; a configurable policy engine auto-approves, routes or auto-rejects; claims route manager -> finance auditor -> finance head; auditors work a review queue with a 10% sample audit; the finance head exports payout batches as a bank CSV. Personas: employee, line manager, finance auditor, finance head (admin). **Contract: the ARD** (`ExpenseFlow-Architecture Requirements Document (ARD).pdf`, ADR-0011); gaps vs code: `docs/14-ard-alignment.md`.
 
-Current state: see `PROGRESS.md` and `PLAN.md` (Phase 2: backend domain).
+Current state: see `PROGRESS.md` and `PLAN.md` (Phase 2: backend domain re-aligned to the ARD in A-0007; frontend features are Phase 3).
 
 ## Business rules (summary - the ARD is authoritative; never hard-code policy values)
-> Being re-aligned to the ARD (docs/14). Where a line below differs from the ARD, the ARD wins.
-- Money is INR in integer **paise**; "above X" means strictly greater.
-- Policy rules live in versioned JSON (`policy_versions`, seed `backend/app/seeds/policy_v1.json`, ADR-0010): meals <= 1,500/day, hotel <= 6,000/night tier-1 else 4,000, local cab <= 2,000/trip, receipt mandatory > 500, duplicates (vendor+amount+date or receipt hash), weekend flag, stale > 90 days.
-- Outcomes: any line auto-reject -> claim rejected; all clean and total <= auto-approve limit -> approved (10% sampled for audit, held from payout until cleared); otherwise routed.
-- Chain (ADR-0009): manager always; + finance auditor if total > 25,000; + finance head if total > 1,00,000. Comment, send back (restarts chain on resubmit), delegate while on leave.
-- Separation of duties: no self-approval (also via delegate); one person acts on at most one step per claim; only the lowest pending step is actionable.
-- Visibility: employees see only their own claims; managers also their reports' and their inbox; auditor/head see all. Enforced in services, never only in the UI.
-- Claim states and allowed transitions: `docs/13` (single transition table in `claims/state.py`).
-- Every action appends to `audit_events`; no update/delete path (DB triggers block it).
+- Money is INR in integer **paise**; "above X" means strictly greater; "up to X" means a value at X passes.
+- Policy is data (ARD 5): versioned `policy_versions` + `policy_rules`, `approval_levels`, `app_config`, seeded from `backend/app/seeds/reference_data.json`. Meals <= 1,500/day (IST day, all claims), hotel <= 6,000/night tier-1 else 4,000, local cab <= 2,000/trip and receipt mandatory > 500 are REJECT; duplicates (vendor+amount+date or receipt SHA-256) ROUTE and force the auditor; weekend (Sat/Sun IST) FLAG; SPLIT_SUSPECT routes to the auditor; CLAIM_AGE_LIMIT is seeded inactive.
+- Outcomes: a rejected line is excluded from the payable total; all lines rejected -> REJECTED; all lines clean and payable <= 5,000 -> APPROVED (independent 10% CSPRNG sample, held from payout until resolved); otherwise the chain.
+- Chain (ADR-001 in the ARD): manager always; + auditor (pool) if payable > 25,000; + finance head if > 1,00,000; levels frozen on the claim at submit; one open step at a time. Send back -> new round on resubmit, earlier steps SUPERSEDED.
+- Separation of duties: never act on your own claim (also as a delegate); one person approves at most one level per claim; delegation is per level, max 30 days, same-or-higher role. Gaps the ARD leaves are decided in docs/14 section E.
+- Visibility: employees see only their own claims (404 otherwise); managers their direct and indirect reports' submitted claims; auditor/head all. Enforced in services, never only in the UI.
+- Claim states and allowed transitions: ARD section 4, `claims/state.py`, and the `claim_transitions` DB trigger.
+- Every state change writes one hash-chained `audit_events` row in the same transaction; DB triggers block update/delete.
 
 ## Repo map
 - `frontend/` Next.js 16 (App Router, React 19, TypeScript) UI. See `frontend/CLAUDE.md`
@@ -46,7 +45,7 @@ Browser calls `/api/*` on the frontend origin; Next.js rewrites proxy it to the 
 - `make test` / `make lint` / `make typecheck` run all checks
 - `make gen-openapi` export the OpenAPI spec, `make gen-client` regenerate the TS client, `make gen-contract` both
 - `make check-contract` fail if the spec or the TS client is out of sync with the backend code
-- `make migrate` apply migrations, `make e2e` start the e2e stack and run the Playwright smoke suite (after P1-05)
+- `make migrate` apply migrations, `make seed` load the demo data into an empty DB, `make e2e` start the e2e stack and run the Playwright smoke suite (after P1-05)
 
 ## Workflow
 - Follow `WORKFLOW.md`: work from a `PLAN.md` task, log every PR/session in `ACTIONS.md`, update task status.

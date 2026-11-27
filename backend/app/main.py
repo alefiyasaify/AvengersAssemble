@@ -15,6 +15,7 @@ from app.core.middleware import REQUEST_ID_HEADER, RequestContextMiddleware
 from app.modules.approvals.router import router as approvals_router
 from app.modules.auth.router import router as auth_router
 from app.modules.claims.router import router as claims_router
+from app.modules.health.router import root_router as health_root_router
 from app.modules.health.router import router as health_router
 from app.modules.org.router import router as org_router
 from app.modules.payouts.router import router as payouts_router
@@ -85,4 +86,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     for router in MODULE_ROUTERS:
         api.include_router(router)
     app.include_router(api)
+    app.include_router(health_root_router)  # /healthz, /readyz at the service root (ARD 8)
     return app

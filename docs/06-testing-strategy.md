@@ -47,6 +47,8 @@ tests/
 - Reset between suites by recreating the volume or calling a guarded `/api/v1/test/reset` that exists only when `APP_ENV=test`.
 - Each test creates the data it needs with unique names.
 
+Backend integration tests use the `api` fixture in `backend/conftest.py`: a pinned clock (Friday 2026-11-27, so weekend and future-date rules are deterministic), the `people` personas (head, two auditors, two managers, employees, an outsider) and helpers that upload receipts, create, submit and decide claims through the HTTP API. Tests that need a sampled claim use `sample_everything`. `tests/test_seed.py` runs a small seed (80 claims) and asserts every planted case is detected.
+
 ## Flaky test policy
 A flaky test is a bug. On first flake: quarantine with `@pytest.mark.flaky_quarantine`, open a ticket with an owner and a 5-working-day SLA, keep it out of the required gate but visible on a dashboard. Retries (max 1) exist to collect traces, not to hide problems.
 

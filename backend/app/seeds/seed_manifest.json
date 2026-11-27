@@ -1,0 +1,3860 @@
+{
+  "seed": 20261127,
+  "today": "2026-11-27",
+  "claims": 3000,
+  "claim_statuses": {
+    "APPROVED": 616,
+    "PAID": 2064,
+    "PENDING_AUDITOR": 9,
+    "PENDING_MANAGER": 16,
+    "REJECTED": 275,
+    "SENT_BACK": 36
+  },
+  "payout_batches": 9,
+  "planted": 383,
+  "planted_detected": 383,
+  "plants": [
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2025-000211",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2025-000223",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2025-000226",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2025-000228",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2025-000241",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2025-000243",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2025-000244",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2025-000246",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2025-000254",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2025-000264",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2025-000267",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2025-000273",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2025-000287",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000010",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-000015",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000016",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-000022",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000037",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000047",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000048",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000067",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000076",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000078",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000089",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000099",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000122",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000128",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000137",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000144",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-000146",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000147",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000158",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000175",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000183",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000194",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000197",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000200",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000213",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000218",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000220",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000224",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000234",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000237",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000240",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000241",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000247",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000254",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000256",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000259",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000260",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000264",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000270",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000282",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000287",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000288",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000300",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000303",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000380",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000385",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000390",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000395",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000396",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000398",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000403",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000404",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000422",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000429",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000450",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000475",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000477",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000483",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000493",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000502",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-000509",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000511",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000512",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000518",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000524",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000541",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-000550",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000565",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000572",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000575",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000585",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000589",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000600",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000651",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-000653",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000656",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-000658",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000664",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000672",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000673",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000674",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000678",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000683",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000691",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000696",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000717",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000725",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000736",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000738",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000742",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000743",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000748",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000750",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000766",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000767",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000774",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000781",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000782",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000786",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000807",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_1l_at",
+      "expected_rule": null,
+      "claim_no": "EF-2026-000820",
+      "line_position": 1,
+      "detected": true,
+      "note": "1,00,000 stops at the auditor",
+      "expected_levels": [
+        1,
+        2
+      ],
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000828",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000835",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000855",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000859",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000875",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000877",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000882",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000885",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000886",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000906",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000916",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000917",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000925",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-000935",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000943",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000948",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000961",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_meals_over",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-000962",
+      "line_position": 1,
+      "detected": true,
+      "note": "meals 1,500.01 is rejected",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000965",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-000967",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000971",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-000978",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000979",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-000980",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-000985",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_meals_at",
+      "expected_rule": null,
+      "claim_no": "EF-2026-001000",
+      "line_position": 1,
+      "detected": true,
+      "note": "meals exactly 1,500 passes",
+      "expected_levels": null,
+      "absent_rule": "MEALS_DAILY_CAP"
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001001",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001007",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001019",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001023",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001025",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001028",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001034",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001036",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001063",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001071",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001077",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001094",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001095",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001101",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001114",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001116",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001124",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001127",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-001147",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001155",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001156",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001160",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001168",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001179",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001181",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-001203",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001212",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001220",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001232",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001250",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001256",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001257",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001269",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001272",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001280",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001288",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001290",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001292",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001298",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001302",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-001304",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001305",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001314",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001315",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001326",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_receipt_over",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001329",
+      "line_position": 1,
+      "detected": true,
+      "note": "500.01 without a receipt is rejected",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001340",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001341",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001344",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001349",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001350",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001360",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001361",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001374",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001380",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001384",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001397",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001402",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001413",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001416",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001425",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001426",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001431",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001441",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001451",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001459",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001463",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001469",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001475",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001476",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001479",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001481",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001484",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001498",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001503",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001517",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001521",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001522",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001528",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001532",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001536",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_1l_over",
+      "expected_rule": null,
+      "claim_no": "EF-2026-001538",
+      "line_position": 1,
+      "detected": true,
+      "note": "1,00,000.01 adds the head",
+      "expected_levels": [
+        1,
+        2,
+        3
+      ],
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001539",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001540",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001550",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001552",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001555",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001556",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001565",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001566",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001570",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001583",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001591",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001596",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001599",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001601",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001614",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001625",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001626",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001645",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001655",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001667",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001668",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001671",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001690",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001697",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001699",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001703",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001705",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001709",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001722",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001745",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001747",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001748",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001756",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001769",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001773",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001779",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001806",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001807",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001836",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001839",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001845",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001858",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001861",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001870",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001885",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001892",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001894",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-001900",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001912",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001914",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001926",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001930",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001932",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001938",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-001948",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-001952",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-001962",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-001975",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-001986",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002009",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002015",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002020",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002027",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002028",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002046",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002048",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002053",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-002056",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002057",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002058",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002059",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-002060",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002061",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002075",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002077",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002080",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_25k_at",
+      "expected_rule": null,
+      "claim_no": "EF-2026-002089",
+      "line_position": 1,
+      "detected": true,
+      "note": "25,000 needs the manager only",
+      "expected_levels": [
+        1
+      ],
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002097",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002106",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002120",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-002129",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002143",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002150",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002154",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_25k_over",
+      "expected_rule": null,
+      "claim_no": "EF-2026-002156",
+      "line_position": 1,
+      "detected": true,
+      "note": "25,000.01 adds the auditor",
+      "expected_levels": [
+        1,
+        2
+      ],
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002161",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002164",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002168",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002170",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002173",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002174",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002178",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002184",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "split",
+      "expected_rule": "SPLIT_SUSPECT",
+      "claim_no": "EF-2026-002194",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002195",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002202",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002206",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002219",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002227",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002235",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002246",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002248",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002252",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002255",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002257",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002269",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002283",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002285",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002292",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002305",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "boundary_receipt_at",
+      "expected_rule": null,
+      "claim_no": "EF-2026-002335",
+      "line_position": 1,
+      "detected": true,
+      "note": "500 without a receipt passes",
+      "expected_levels": null,
+      "absent_rule": "RECEIPT_REQUIRED"
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002336",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002365",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-002383",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002391",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002394",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002397",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002399",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002401",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002412",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002416",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002433",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002436",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002450",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002457",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002459",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002463",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002470",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002482",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-002489",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002497",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002509",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002517",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002530",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002553",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002554",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002555",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002557",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "cab_breach",
+      "expected_rule": "CAB_TRIP_CAP",
+      "claim_no": "EF-2026-002560",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002567",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002568",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-002578",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002584",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-002586",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002587",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002590",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002592",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002598",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002624",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "missing_receipt",
+      "expected_rule": "RECEIPT_REQUIRED",
+      "claim_no": "EF-2026-002627",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002632",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002643",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002652",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "meals_breach",
+      "expected_rule": "MEALS_DAILY_CAP",
+      "claim_no": "EF-2026-002665",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002668",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_receipt",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002679",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "hotel_breach",
+      "expected_rule": "HOTEL_NIGHT_CAP",
+      "claim_no": "EF-2026-002683",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002691",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002715",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "dup_vendor",
+      "expected_rule": "DUPLICATE_LINE",
+      "claim_no": "EF-2026-002718",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    },
+    {
+      "kind": "weekend",
+      "expected_rule": "WEEKEND_SPEND",
+      "claim_no": "EF-2026-002721",
+      "line_position": 1,
+      "detected": true,
+      "note": "",
+      "expected_levels": null,
+      "absent_rule": null
+    }
+  ]
+}

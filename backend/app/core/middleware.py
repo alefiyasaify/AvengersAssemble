@@ -64,7 +64,7 @@ class RequestContextMiddleware:
             logger.exception("unhandled_error")
             if not response_started:
                 response = error_json(
-                    500, "internal_error", "An unexpected error occurred.", request_id
+                    500, "INTERNAL_ERROR", "An unexpected error occurred.", request_id
                 )
                 await response(scope, receive, send_wrapper)
         finally:

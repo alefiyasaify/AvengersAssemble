@@ -18,7 +18,7 @@ define delegate
 	fi
 endef
 
-.PHONY: help doctor setup dev up down test lint typecheck gen-openapi gen-client gen-contract check-contract migrate e2e mock-api
+.PHONY: help doctor setup dev up down test lint typecheck gen-openapi gen-client gen-contract check-contract migrate seed e2e mock-api
 
 help: ## List available targets
 	@echo "Usage: make <target>"
@@ -90,6 +90,9 @@ check-contract: ## Fail if openapi.json or the generated TS client is out of syn
 
 migrate: ## Apply Alembic migrations
 	$(call delegate,$(BACKEND),Makefile,$(MAKE) -C $(BACKEND) migrate,migrate)
+
+seed: ## Load the ExpenseFlow demo data into an empty backend database (ARD 12)
+	$(call delegate,$(BACKEND),Makefile,$(MAKE) -C $(BACKEND) seed,seed)
 
 e2e: ## Start the isolated e2e stack and run the smoke suite (docs/06)
 	$(call delegate,$(TESTS),Makefile,$(MAKE) -C $(TESTS) stack-up && $(MAKE) -C $(TESTS) e2e-smoke,e2e smoke)
