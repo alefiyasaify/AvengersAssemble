@@ -33,7 +33,9 @@ _SAFE_NAME = re.compile(r"[^A-Za-z0-9._ -]+")
 # Receipts are shown inline (side-by-side viewer) but can never run script or be re-sniffed.
 SAFE_FILE_HEADERS = {
     "X-Content-Type-Options": "nosniff",
-    "Content-Security-Policy": "sandbox; default-src 'none'; img-src 'self'; style-src 'unsafe-inline'",
+    "Content-Security-Policy": (
+        "sandbox; default-src 'none'; img-src 'self'; style-src 'unsafe-inline'"
+    ),
     "Cache-Control": "private, max-age=300",
 }
 
@@ -126,7 +128,12 @@ class ReceiptService:
     def info(self, ids: Collection[str]) -> dict[str, StoredReceipt]:
         return {
             rid: StoredReceipt(
-                r.id, r.owner_id, r.sha256, r.mime, r.original_name, self._storage.path(r.storage_key)
+                r.id,
+                r.owner_id,
+                r.sha256,
+                r.mime,
+                r.original_name,
+                self._storage.path(r.storage_key),
             )
             for rid, r in self._repo.by_ids(ids).items()
         }

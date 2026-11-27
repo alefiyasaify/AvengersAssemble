@@ -24,12 +24,7 @@ class ExampleService:
     def list_examples(self, page: PageParams) -> Page[ExampleRead]:
         """Paginated list, newest first."""
         rows, total = self._repository.list(limit=page.limit, offset=page.offset)
-        return Page[ExampleRead](
-            items=[ExampleRead.model_validate(r) for r in rows],
-            total=total,
-            limit=page.limit,
-            offset=page.offset,
-        )
+        return Page[ExampleRead].of([ExampleRead.model_validate(r) for r in rows], total, page)
 
     def get_example(self, example_id: str) -> ExampleRead:
         """Raises NotFoundError if absent."""
@@ -44,7 +39,7 @@ class ExampleService:
         example = self._require(example_id)
         if example.version != data.version:
             raise ConflictError(
-                "The example was modified by someone else.", code="example_version_conflict"
+                "The example was modified by someone else.", code="EXAMPLE_VERSION_CONFLICT"
             )
         changes = data.model_dump(exclude_unset=True, exclude={"version"})
         for field, value in changes.items():
@@ -59,5 +54,5 @@ class ExampleService:
     def _require(self, example_id: str) -> Example:
         example = self._repository.get(example_id)
         if example is None:
-            raise NotFoundError(f"Example {example_id} was not found.", code="example_not_found")
+            raise NotFoundError(f"Example {example_id} was not found.", code="EXAMPLE_NOT_FOUND")
         return example

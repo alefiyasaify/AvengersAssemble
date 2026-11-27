@@ -26,7 +26,7 @@ class HealthService:
         except SQLAlchemyError as exc:
             logger.warning("readiness_db_check_failed", extra={"error": type(exc).__name__})
             raise ServiceUnavailableError(
-                "The database is not reachable.", code="database_unavailable"
+                "The database is not reachable.", code="DATABASE_UNAVAILABLE"
             ) from exc
         return ReadyRead(checks={"database": "ok"})
 

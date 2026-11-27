@@ -70,9 +70,7 @@ class PolicyRepository:
         self._session.flush()
 
     def config(self) -> dict[str, Any]:
-        return {
-            row.key: row.value for row in self._session.execute(select(AppConfig)).scalars()
-        }
+        return {row.key: row.value for row in self._session.execute(select(AppConfig)).scalars()}
 
     def set_config(self, key: str, value: Any) -> None:
         self._session.merge(AppConfig(key=key, value=value))

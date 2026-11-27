@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
-from app.core.errors import ConflictError, ErrorDetail, NotFoundError, error_responses
+from app.core.errors import ConflictError, NotFoundError, error_responses
 from app.main import create_app
 
 
@@ -17,10 +17,10 @@ def error_client(settings: Settings) -> Iterator[TestClient]:
     app: FastAPI = create_app(settings)
 
     def raise_not_found() -> None:
-        raise NotFoundError("Order 42 was not found.", code="order_not_found")
+        raise NotFoundError("Order 42 was not found.", code="ORDER_NOT_FOUND")
 
     def raise_conflict() -> None:
-        raise ConflictError("Busy.", details=[ErrorDetail(field="version", issue="stale")])
+        raise ConflictError("Busy.", details={"fields": [{"field": "version", "issue": "stale"}]})
 
     def raise_unexpected() -> None:
         raise RuntimeError("secret internals: SELECT * FROM users")
@@ -49,9 +49,9 @@ def test_domain_error_maps_to_envelope_when_not_found_raised(error_client: TestC
     assert response.status_code == 404
     assert response.json() == {
         "error": {
-            "code": "order_not_found",
+            "code": "ORDER_NOT_FOUND",
             "message": "Order 42 was not found.",
-            "details": [],
+            "details": {},
             "request_id": response.headers["X-Request-ID"],
         }
     }
@@ -59,30 +59,30 @@ def test_domain_error_maps_to_envelope_when_not_found_raised(error_client: TestC
 
 def test_domain_error_includes_details_when_given(error_client: TestClient) -> None:
     body = error_client.get("/t/conflict").json()["error"]
-    assert body["code"] == "conflict"
-    assert body["details"] == [{"field": "version", "issue": "stale"}]
+    assert body["code"] == "CONFLICT"
+    assert body["details"] == {"fields": [{"field": "version", "issue": "stale"}]}
 
 
-def test_validation_error_maps_to_422_with_field_details_when_query_invalid(
+def test_validation_error_maps_to_400_with_field_details_when_query_invalid(
     error_client: TestClient,
 ) -> None:
     response = error_client.get("/t/validate", params={"quantity": 0})
-    assert response.status_code == 422
+    assert response.status_code == 400
     error = response.json()["error"]
-    assert error["code"] == "validation_failed"
-    assert error["details"][0]["field"] == "query.quantity"
+    assert error["code"] == "VALIDATION_FAILED"
+    assert error["details"]["fields"][0]["field"] == "query.quantity"
 
 
 def test_unknown_route_maps_to_404_envelope_always(error_client: TestClient) -> None:
     response = error_client.get("/does-not-exist")
     assert response.status_code == 404
-    assert response.json()["error"]["code"] == "not_found"
+    assert response.json()["error"]["code"] == "NOT_FOUND"
 
 
 def test_wrong_method_maps_to_405_envelope_always(error_client: TestClient) -> None:
     response = error_client.post("/api/v1/health/live")
     assert response.status_code == 405
-    assert response.json()["error"]["code"] == "method_not_allowed"
+    assert response.json()["error"]["code"] == "METHOD_NOT_ALLOWED"
 
 
 def test_http_exception_keeps_headers_when_raised(error_client: TestClient) -> None:
@@ -90,9 +90,9 @@ def test_http_exception_keeps_headers_when_raised(error_client: TestClient) -> N
     assert response.status_code == 429
     assert response.headers["Retry-After"] == "5"
     assert response.json()["error"] == {
-        "code": "rate_limited",
+        "code": "RATE_LIMITED",
         "message": "Slow down.",
-        "details": [],
+        "details": {},
         "request_id": response.headers["X-Request-ID"],
     }
 
@@ -109,7 +109,7 @@ def test_unexpected_error_returns_generic_500_without_leaking_when_raised(
     response = error_client.get("/t/boom")
     assert response.status_code == 500
     error = response.json()["error"]
-    assert error["code"] == "internal_error"
+    assert error["code"] == "INTERNAL_ERROR"
     assert "SELECT" not in response.text
     assert error["request_id"] == response.headers["X-Request-ID"]
     assert any(r.message == "unhandled_error" and r.exc_info for r in caplog.records)

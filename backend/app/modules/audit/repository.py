@@ -52,7 +52,9 @@ class AuditRepository:
             stmt = stmt.where(AuditEvent.ts >= f.since)
         if f.until:
             stmt = stmt.where(AuditEvent.ts <= f.until)
-        total = self._session.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+        total = self._session.execute(
+            select(func.count()).select_from(stmt.subquery())
+        ).scalar_one()
         rows = self._session.execute(
             stmt.order_by(AuditEvent.id.desc()).limit(limit).offset(offset)
         ).scalars()

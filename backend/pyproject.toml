@@ -13,6 +13,7 @@ dependencies = [
     "pyjwt>=2.15.1",
     "python-multipart>=0.0.34",
     "sqlalchemy>=2.1.9",
+    "tzdata>=2025.2",
     "uuid-utils>=1.2.0",
     "uvicorn[standard]>=0.54.0",
 ]
@@ -50,7 +51,7 @@ max-complexity = 10
 [tool.ruff.lint.per-file-ignores]
 # Tests: assert is the point; fixed fake secrets/passwords are test data.
 "tests/**" = ["S101", "S105", "S106"]
-"conftest.py" = ["S105", "S106"]
+"conftest.py" = ["S101", "S105", "S106"]
 "app/modules/*/tests/**" = ["S101", "S105", "S106"]
 # Revision template always imports `sa`/`op`; empty migrations don't use them.
 "app/migrations/versions/*.py" = ["F401", "E501"]

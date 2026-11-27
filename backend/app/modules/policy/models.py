@@ -4,7 +4,16 @@ levels and scalar settings. Rules of a non-DRAFT version are immutable (DB trigg
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, ForeignKey, Index, String, UniqueConstraint, text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    ForeignKey,
+    Index,
+    String,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base, IdMixin, utcnow
@@ -28,9 +37,7 @@ class PolicyVersion(IdMixin, Base):
     notes: Mapped[str | None] = mapped_column(String(500))
     created_by_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
-    published_by_id: Mapped[str | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL")
-    )
+    published_by_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     published_at: Mapped[datetime | None]
 
     rules: Mapped[list["PolicyRule"]] = relationship(

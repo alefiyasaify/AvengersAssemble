@@ -26,7 +26,7 @@ def test_check_ready_reports_ok_when_database_reachable() -> None:
 def test_check_ready_raises_unavailable_when_database_unreachable() -> None:
     with pytest.raises(ServiceUnavailableError) as exc_info:
         HealthService(BrokenRepository()).check_ready()
-    assert exc_info.value.code == "database_unavailable"
+    assert exc_info.value.code == "DATABASE_UNAVAILABLE"
     assert exc_info.value.status_code == 503
 
 

@@ -101,8 +101,10 @@ class PolicyService:
         data = load_reference_data()
         if not self._repo.levels():
             self._repo.replace_levels(
-                [ApprovalLevel(**ApprovalLevelConfig.model_validate(lv).model_dump())
-                 for lv in data["approval_levels"]]
+                [
+                    ApprovalLevel(**ApprovalLevelConfig.model_validate(lv).model_dump())
+                    for lv in data["approval_levels"]
+                ]
             )
         config = self._repo.config()
         for key, value in data["app_config"].items():
@@ -111,7 +113,12 @@ class PolicyService:
         if self._repo.max_version() == 0:
             rules = [PolicyRuleConfig.model_validate(r) for r in data["policy_rules"]]
             version = self._repo.add(
-                PolicyVersion(version_no=1, status="DRAFT", notes="Seeded from the ARD", created_at=self._now())
+                PolicyVersion(
+                    version_no=1,
+                    status="DRAFT",
+                    notes="Seeded from the ARD",
+                    created_at=self._now(),
+                )
             )
             self._repo.replace_rules(version, _rule_rows(rules))
             version.status = "ACTIVE"
@@ -191,7 +198,11 @@ class PolicyService:
         return _read(version)
 
     def update_draft(
-        self, principal: Principal, version_id: str, notes: str | None, rules: list[PolicyRuleConfig]
+        self,
+        principal: Principal,
+        version_id: str,
+        notes: str | None,
+        rules: list[PolicyRuleConfig],
     ) -> PolicyVersionRead:
         require_head(principal)
         version = self._draft(version_id)

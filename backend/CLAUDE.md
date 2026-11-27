@@ -11,8 +11,10 @@ Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.x (sync), Alembic, pytest (+ htt
 - `make test` pytest with coverage gate (85%)
 - `make lint` ruff check + format check + import-linter, `make format` auto-fix, `make typecheck` mypy strict
 - `make revision m="add_orders"` create migration, `make migrate` apply
+- `make seed` migrate an empty DB and load the deterministic demo data (`app/seeds/generate.py`; prints demo logins once)
 - `make gen-openapi` write `openapi.json` (commit it), `make check-openapi` drift check
 - `make audit` pip-audit
+- `make requirements` regenerate `requirements.txt` / `requirements-dev.txt` from `uv.lock` after any dependency change (pip users install from them; uv stays the source of truth)
 
 ## Layout and layering
 `app/modules/<name>/{router,schemas,service,repository,models,deps}.py`
