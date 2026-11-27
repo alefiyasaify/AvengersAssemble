@@ -1,0 +1,33 @@
+# Full ExpenseFlow stack. Put SECRET_KEY in a root .env (gitignored), then: docker compose up -d --build
+# App: http://localhost:3000   API docs (non-production): http://localhost:8000/docs
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
+    environment:
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env (32+ random characters)}
+      APP_ENV: ${APP_ENV:-local}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SELF_REGISTRATION_ENABLED: ${SELF_REGISTRATION_ENABLED:-true}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
+    volumes:
+      - backend-data:/app/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  backend-data:
