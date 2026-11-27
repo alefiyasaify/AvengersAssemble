@@ -32,6 +32,9 @@ class Settings(DatabaseSettings):
     git_sha: str = "unknown"
     receipts_dir: str = "./data/receipts"
     max_receipt_bytes: int = Field(default=5 * 1024 * 1024, ge=1024, le=20 * 1024 * 1024)
+    # Public self-registration (POST /auth/register). Accounts are created inactive as EMPLOYEE
+    # and need finance-head activation; set false to allow only admin-created users.
+    self_registration_enabled: bool = True
     # Shared password for seeded demo users (make seed). Only used by the seed command; never
     # needed in production. Leave unset outside local/demo environments.
     demo_password: SecretStr | None = None

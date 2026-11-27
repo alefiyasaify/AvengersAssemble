@@ -51,7 +51,7 @@ Decided in ADR-0006: HttpOnly cookies carrying short-lived JWTs for browsers (wi
 ## Required system endpoints
 `GET /healthz` (liveness), `GET /readyz` (checks DB), `GET /metrics` (Prometheus, P3-08) at the service root; `GET /api/v1/health/live`, `/api/v1/health/ready`, `/api/v1/version` remain as aliases. `GET /api/v1/me` returns the user, role and permissions the UI uses.
 
-Additive endpoint beyond the ARD list: `POST /api/v1/approvals/{step_id}/reassign` (finance head only, audited, never on their own claim) unblocks a step nobody may act on (docs/14 E5). `Idempotency-Key` is accepted by CORS but not stored yet (AI-013).
+Additive endpoints beyond the ARD list: `POST /api/v1/auth/register` (public self-registration; always an inactive EMPLOYEE, same 202 answer whether or not the email exists, rate-limited, off with `SELF_REGISTRATION_ENABLED=false`; the head finds pending accounts with `GET /admin/users?pending=true` and activates them with `PATCH /admin/users/{id}`), and `POST /api/v1/approvals/{step_id}/reassign` (finance head only, audited, never on their own claim) unblocks a step nobody may act on (docs/14 E5). `Idempotency-Key` is accepted by CORS but not stored yet (AI-013).
 
 ## Spec lifecycle
 1. Backend dev changes routers/schemas.

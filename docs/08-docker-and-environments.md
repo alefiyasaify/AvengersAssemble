@@ -32,7 +32,7 @@ Stages: `deps` (pnpm install --frozen-lockfile), `build` (`next build` with `out
 | production | users | persistent volume + backups | secret store |
 
 ## Env var contract
-Backend: `APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`, `LOG_LEVEL`, `ACCESS_TOKEN_TTL_MIN`, `REFRESH_TOKEN_TTL_DAYS` (ADR-0006), `GIT_SHA` (build commit, set by CI/Docker), `RECEIPTS_DIR` (receipt file storage, a volume in Docker), `MAX_RECEIPT_BYTES` (default 5 MB). The seed command also reads `SEED_DEMO_PASSWORD` (demo login password; generated and printed once when unset, never stored). Frontend (all build-time, ADR-0008): `APP_ENV`, `BACKEND_INTERNAL_URL` (server-only), `NEXT_PUBLIC_APP_NAME`, other `NEXT_PUBLIC_*` (non-secret only). Every variable documented in its `.env.example`.
+Backend: `APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`, `LOG_LEVEL`, `ACCESS_TOKEN_TTL_MIN`, `REFRESH_TOKEN_TTL_DAYS` (ADR-0006), `GIT_SHA` (build commit, set by CI/Docker), `RECEIPTS_DIR` (receipt file storage, a volume in Docker), `MAX_RECEIPT_BYTES` (default 5 MB), `SELF_REGISTRATION_ENABLED` (default true; public sign-up of inactive employees). The seed command also reads `SEED_DEMO_PASSWORD` (demo login password; generated and printed once when unset, never stored). Frontend (all build-time, ADR-0008): `APP_ENV`, `BACKEND_INTERNAL_URL` (server-only), `NEXT_PUBLIC_APP_NAME`, other `NEXT_PUBLIC_*` (non-secret only). Every variable documented in its `.env.example`.
 
 ## `.dockerignore`
 Exclude `.git`, `node_modules`, `.next`, `.venv`, `*.db*`, `.env*` (except examples), tests output, docs.

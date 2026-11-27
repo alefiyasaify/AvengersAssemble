@@ -155,3 +155,14 @@ IDs: take the next number after the last entry. If two entries collide after a m
 - Migration: none
 - Verification: `migrate()` twice on a fresh SQLite file creates the tables and is idempotent; `pytest tests/test_seed.py`: 1 passed; `mypy`: no issues
 - Follow-ups: none
+
+### A-0010 | 2026-11-27 | backend | Self-registration API
+- By: agent (Claude Code, claude-opus-5-5) on behalf of a team member
+- Type: feat
+- Plan refs: P2-02 (auth), docs/14 E10
+- Branch / PR / commits: branch `feat/P2-05-ard-backend-domain` (local, not committed)
+- What changed: `POST /api/v1/auth/register` (auth router/service, `org.service.self_register`): inactive EMPLOYEE, no role input, enumeration-safe 202, per-client rate limit shared with sign-in, audited `user.registered`; setting `SELF_REGISTRATION_ENABLED` (+ .env.example); `GET /admin/users` gains `pending=true` and matches email (admin only). Docs 02, 08, 14 updated.
+- Contract impact: additive (`auth_register`; `pending` query param); openapi.json regenerated; frontend client still pending (AI-012)
+- Migration: none
+- Verification: `pytest app/modules/auth app/modules/org`: 9 passed; full `pytest --cov`: 177 passed, coverage 89.99%; `ruff check`, `ruff format --check`, `lint-imports` (13 kept), `mypy` (123 files), `export_openapi --check`: pass
+- Follow-ups: none new

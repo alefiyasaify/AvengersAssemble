@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - ExpenseFlow API per the ARD: claims (drafts, lines, policy preview, submit, resubmit, withdraw, timeline, comments, receipt download), approvals (inbox, approve, reject, send back, reassign), delegations, auditor review queue with bulk approve, sample audits, payout batches with maker-checker and the mock bank CSV, role-scoped dashboard summary, `/healthz` and `/readyz` (A-0007).
+- `POST /api/v1/auth/register`: self-registration of inactive employees, activated by the finance head (`GET /admin/users?pending=true`).
 - `make seed`: deterministic demo data (150 employees, 3,000 claims, planted cases) and `seed_manifest.json`.
 
 ### Changed

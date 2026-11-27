@@ -47,19 +47,26 @@ class OrgRepository:
         )
 
     def search_users(
-        self, query: str, *, limit: int, offset: int, active_only: bool = True
+        self,
+        query: str,
+        *,
+        limit: int,
+        offset: int,
+        active_only: bool = True,
+        inactive_only: bool = False,
+        match_email: bool = False,
     ) -> tuple[list[User], int]:
         stmt = select(User)
         if active_only:
             stmt = stmt.where(User.is_active.is_(True))
+        if inactive_only:
+            stmt = stmt.where(User.is_active.is_(False))
         if query:
             like = f"%{query.strip().lower()}%"
-            stmt = stmt.where(
-                or_(
-                    func.lower(User.full_name).like(like),
-                    func.lower(User.employee_code).like(like),
-                )
-            )
+            fields = [func.lower(User.full_name), func.lower(User.employee_code)]
+            if match_email:  # admin search only: never let the public search probe emails
+                fields.append(func.lower(User.email))
+            stmt = stmt.where(or_(*(f.like(like) for f in fields)))
         total = self._session.execute(
             select(func.count()).select_from(stmt.subquery())
         ).scalar_one()

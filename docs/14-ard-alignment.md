@@ -87,6 +87,7 @@ Section B rows, as built and tested in `backend/` (168 tests, coverage 86.97%):
 | E6 | Who may cover the head level | An auditor or the head (exception to "same role") | With one head, nobody else could ever cover it |
 | E7 | Head acting on auditor-pool steps | Allowed (same-or-higher role); separation of duties still applies | Lets the head clear the queue and use bulk approve |
 | E8 | Bank file narration | Letters, digits, spaces **and hyphens**, max 30 | ARD's own sample narration is a claim number with hyphens |
+| E10 | Self-registration (not in the ARD; requested by the team) | `POST /auth/register` creates an INACTIVE EMPLOYEE only (no role field), answers 202 the same for new and existing emails, is rate-limited, and is switched off by config; the head activates and fixes department/manager | ARD: users are admin-created (section 2); an open sign-up must not grant a role or an active account |
 | E9 | Average approval time | Counts every chain decision (approved or rejected) from the last (re)submission | Resubmitting resets `submitted_at`, which removes SENT_BACK time as ARD 10 asks |
 
 ### Still open

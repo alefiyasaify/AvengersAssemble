@@ -1,6 +1,7 @@
 """Public interface of the org module: people, roles, reporting hierarchy, reference data,
 mock bank accounts and user administration (ARD sections 2 and 7)."""
 
+import secrets
 from collections.abc import Collection
 from dataclasses import dataclass
 
@@ -172,10 +173,18 @@ class OrgService:
         return [CategoryRead.model_validate(c) for c in self._repo.categories()]
 
     # ------------------------------------------------------------------ administration
-    def admin_list(self, principal: Principal, query: str, page: PageParams) -> Page[UserRead]:
+    def admin_list(
+        self, principal: Principal, query: str, page: PageParams, *, pending: bool = False
+    ) -> Page[UserRead]:
+        """`pending=True` lists inactive accounts, e.g. self-registrations awaiting activation."""
         require_head(principal)
         rows, total = self._repo.search_users(
-            query, limit=page.limit, offset=page.offset, active_only=False
+            query,
+            limit=page.limit,
+            offset=page.offset,
+            active_only=False,
+            inactive_only=pending,
+            match_email=True,
         )
         return Page[UserRead].of([UserRead.model_validate(u) for u in rows], total, page)
 
@@ -199,6 +208,52 @@ class OrgService:
         )
         self._record(principal, "user.created", user, None)
         return UserRead.model_validate(user)
+
+    def self_register(
+        self,
+        *,
+        email: str,
+        full_name: str,
+        password_hash: str,
+        department_id: str,
+        manager_id: str | None,
+        home_city_id: str | None,
+    ) -> str | None:
+        """Create an INACTIVE EMPLOYEE (public registration). None if the email is taken.
+
+        The finance head reviews department and manager and activates the account with
+        `PATCH /admin/users/{id}`; until then sign-in fails like a wrong password.
+        """
+        address = email.strip().lower()
+        if self._repo.get_user_by_email(address):
+            return None
+        self._check_refs(department_id, manager_id, home_city_id)
+        if manager_id is not None:
+            manager = self._repo.get_user(manager_id)
+            if manager is None or not manager.is_active or manager.role not in APPROVER_ROLES:
+                raise ValidationFailed("Choose an active manager.", code="INVALID_MANAGER")
+        user = self._repo.add_user(
+            User(
+                email=address,
+                full_name=full_name.strip(),
+                employee_code=f"R{secrets.token_hex(4).upper()}",
+                role="EMPLOYEE",
+                department_id=department_id,
+                manager_id=manager_id,
+                home_city_id=home_city_id,
+                password_hash=password_hash,
+                is_active=False,
+            )
+        )
+        if self._audit is not None:
+            self._audit.record(
+                actor_id=user.id,
+                action="user.registered",
+                entity_type="user",
+                entity_id=user.id,
+                after=UserRead.model_validate(user).model_dump(mode="json"),
+            )
+        return user.id
 
     def admin_update(self, principal: Principal, user_id: str, data: UserUpdate) -> UserRead:
         require_head(principal)

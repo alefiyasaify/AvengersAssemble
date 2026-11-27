@@ -12,9 +12,15 @@ from datetime import timedelta
 from functools import cache
 
 from app.core.config import Settings
-from app.core.errors import AppError, RateLimitedError, UnauthenticatedError
+from app.core.errors import (
+    AppError,
+    PermissionDeniedError,
+    RateLimitedError,
+    UnauthenticatedError,
+)
 from app.core.security import create_token, decode_token, hash_password, verify_password
 from app.modules.audit.service import AuditService
+from app.modules.auth.schemas import RegisterRequest, RegisterResult
 from app.modules.org.service import OrgService
 
 
@@ -108,6 +114,26 @@ class AuthService:
             actor_id=user_id, action="auth.login", entity_type="user", entity_id=user_id
         )
         return LoginResult(user_id, self._issue(user_id, role), None)
+
+    def register(self, data: RegisterRequest, client: str) -> RegisterResult:
+        """Public self-registration (inactive EMPLOYEE). Rate-limited per client like sign-in.
+        The password is hashed even when the email is taken, so timing does not reveal it."""
+        if not self._settings.self_registration_enabled:
+            raise PermissionDeniedError(
+                "Self-registration is turned off. Ask the finance team for an account.",
+                code="REGISTRATION_DISABLED",
+            )
+        self._guard.check(f"register:{data.email.strip().lower()}", client)
+        password_hash = hash_password(data.password)
+        self._org.self_register(
+            email=data.email,
+            full_name=data.full_name,
+            password_hash=password_hash,
+            department_id=data.department_id,
+            manager_id=data.manager_id,
+            home_city_id=data.home_city_id,
+        )
+        return RegisterResult()
 
     def _fail(self, account: str, user_id: str | None) -> LoginResult:
         locked = self._guard.failed(account)
