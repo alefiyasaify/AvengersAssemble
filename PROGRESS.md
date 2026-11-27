@@ -6,19 +6,20 @@
 
 ## 1. Snapshot (generated)
 <!-- PROGRESS:START -->
-_Updated MANUALLY 2026-11-27 (`scripts/progress.py` / `make progress` do not exist yet: P1-09, AI-009). Counts taken from PLAN.md and ACTIONS.md as of A-0005._
+_Updated MANUALLY 2026-11-27 after A-0007 (`scripts/progress.py` / `make progress` do not exist yet: P1-09, AI-009). Counts taken from PLAN.md._
 
 | Phase | Done | In review | In progress | Blocked | To do | Total | Complete |
 |---|---|---|---|---|---|---|---|
 | 1 | 1 | 3 | 0 | 0 | 7 | 11 | 9% |
-| 2 | 0 | 0 | 0 | 0 | 4 | 4 | 0% |
+| 2 | 1 | 9 | 1 | 0 | 0 | 11 | 9% |
+| 3 | 0 | 0 | 0 | 0 | 8 | 8 | 0% |
 | 4 | 0 | 0 | 0 | 0 | 4 | 4 | 0% |
-| **All** | 1 | 3 | 0 | 0 | 15 | 19 | **5%** |
+| **All** | 2 | 12 | 1 | 0 | 19 | 34 | **6%** |
 
-- Open action items: 9 (AI-001 to AI-009; AI-005 and AI-006 in progress)
-- Blockers: no blocked tasks
-- Last log entry: A-0005 (2026-11-27, docs): Sync all Markdown files with the implementation
-- Note: placeholder rows like `P3-xx` are not counted until broken down into real task IDs. "In review" tasks have no PR yet (no git repo; AI-004).
+- Open action items: see ACTIONS.md section 1 (new in A-0007: AI-012 to AI-015)
+- Blockers: no blocked tasks; `make check-contract` fails until the frontend client is regenerated (AI-012)
+- Last log entry: A-0007 (2026-11-27, backend): Backend re-aligned to the ARD
+- Note: "In review" tasks have no PR yet; A-0007 is on a local branch, not committed.
 <!-- PROGRESS:END -->
 
 ## 2. Current focus (manual, update at least weekly)
@@ -42,7 +43,7 @@ Fill from CI and tool output, with the date measured. Targets come from `docs/06
 
 | Metric | Target | Current | Measured | Trend |
 |---|---|---|---|---|
-| Backend line coverage | >= 85% | 99.37% | 2026-11-27 | new |
+| Backend line coverage | >= 85% | 86.97% (168 tests, ARD domain added) | 2026-11-27 | down from 99.37% on the scaffold; gate met |
 | Frontend coverage (features, shared) | >= 80% | 100% lines, 93.5% branches | 2026-11-27 | new |
 | CI pass rate on `main` (last 20 runs) | >= 95% | n/a (no CI yet, P1-07) | | |
 | E2E smoke pass rate | 100% | n/a (no tests/ yet, P1-05) | | |

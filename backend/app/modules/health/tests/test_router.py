@@ -28,7 +28,7 @@ def test_get_ready_returns_503_envelope_when_database_unreachable(
     response = client.get("/api/v1/health/ready")
     assert response.status_code == 503
     error = response.json()["error"]
-    assert error["code"] == "database_unavailable"
+    assert error["code"] == "DATABASE_UNAVAILABLE"
     assert error["request_id"] == response.headers["X-Request-ID"]
 
 
@@ -43,3 +43,8 @@ def test_get_ready_uses_real_database_when_not_overridden(app: FastAPI) -> None:
     with TestClient(app) as raw_client:
         response = raw_client.get("/api/v1/health/ready")
     assert response.status_code == 200
+
+
+def test_ard_probe_paths_answer_at_root_always(client: TestClient) -> None:
+    assert client.get("/healthz").json() == {"status": "ok"}
+    assert client.get("/readyz").status_code == 200

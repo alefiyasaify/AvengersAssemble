@@ -3,7 +3,7 @@
 > Living roadmap. Answers: **what are we building, in what order, and where are we now?**
 > Update rules are in `WORKFLOW.md`. Completed work is logged in `ACTIONS.md`, decisions in `docs/adr/`.
 
-- Last updated: 2026-11-27
+- Last updated: 2026-11-27 (A-0007)
 - Current phase: **Phase 1: Foundation**
 - Plan owner: <name/team>
 
@@ -42,16 +42,16 @@ Break these down when the phase starts (use IDs `P2-xx`, `P3-xx`, `P4-xx`).
 | ID | Item | Phase | Owner | Status |
 |---|---|---|---|---|
 | P2-01 | ExpenseFlow architecture: docs/00, docs/13, ADR-0009/0010, then ARD adopted (ADR-0011, docs/14) | 2 | | in-review |
-| P2-00 | Resolve ARD vs guideline conflicts G1-G8 (docs/14 section A) | 2 | | blocked |
+| P2-00 | Resolve ARD vs guideline conflicts G1-G8 (docs/14 section A) (resolved 2026-11-27 by the project lead, docs/14 A) | 2 | | done |
 | P2-02 | Backend org + auth: departments, users/roles, login/logout/me, cookie JWT + CSRF, rate limit (F-001) | 2 | | in-progress |
-| P2-03 | Backend audit trail: append-only audit_events + DB triggers (F-008) | 2 | | in-progress |
-| P2-04 | Backend policy engine, tests first: rule catalogue, versioned config, evaluation (F-003) | 2 | | in-progress |
-| P2-05 | Backend claims + lines + receipts + state machine, own-data visibility (F-002) | 2 | | in-progress |
-| P2-06 | Backend approval chain: steps, comment, send back, delegation, separation of duties (F-004) | 2 | | in-progress |
-| P2-07 | Backend auditor queue: filters, bulk approve, 10% sample audit (F-005) | 2 | | in-progress |
-| P2-08 | Backend payout batches + mock bank CSV + mark paid (F-006) | 2 | | in-progress |
-| P2-09 | Backend reports API: spend by category/department/month, violations, avg approval time (F-007) | 2 | | in-progress |
-| P2-10 | Seed data: 150 employees, 8 departments, hierarchy, 3,000 historical claims with planted duplicates/breaches (F-009) | 2 | | todo |
+| P2-03 | Backend audit trail: append-only audit_events + DB triggers (F-008) (A-0007) | 2 | | in-review |
+| P2-04 | Backend policy engine, tests first: rule catalogue, versioned config, evaluation (F-003) (A-0007) | 2 | | in-review |
+| P2-05 | Backend claims + lines + receipts + state machine, own-data visibility (F-002) (A-0007) | 2 | | in-review |
+| P2-06 | Backend approval chain: steps, comment, send back, delegation, separation of duties (F-004) (A-0007) | 2 | | in-review |
+| P2-07 | Backend auditor queue: filters, bulk approve, 10% sample audit (F-005) (A-0007) | 2 | | in-review |
+| P2-08 | Backend payout batches + mock bank CSV + mark paid (F-006) (A-0007) | 2 | | in-review |
+| P2-09 | Backend reports API: spend by category/department/month, violations, avg approval time (F-007) (A-0007) | 2 | | in-review |
+| P2-10 | Seed data: 150 employees, 8 departments, hierarchy, 3,000 historical claims with planted duplicates/breaches (F-009) (A-0007, `make seed`) | 2 | | in-review |
 | P3-01 | Frontend auth + app shell + role-based navigation | 3 | | todo |
 | P3-02 | Frontend claim capture (mobile-friendly), drafts, submit, clarification | 3 | | todo |
 | P3-03 | Frontend approver inbox with side-by-side receipt viewer, delegation | 3 | | todo |
@@ -93,7 +93,8 @@ Break these down when the phase starts (use IDs `P2-xx`, `P3-xx`, `P4-xx`).
 | ID | Question | Asked by | Answer | Date resolved |
 |---|---|---|---|---|
 | Q-01 | What does the application do (domain, features, users)? Needed to fill docs/00 and the Phase 3 backlog | | ExpenseFlow (UseCase.docx), docs/00 | 2026-11-27 |
-| Q-03 | Resolve ARD conflicts G1-G8 (repo layout, cursor pagination, 400 vs 422, error code case, health paths, refresh TTL, /me, enum case) | agent | | |
+| Q-03 | Resolve ARD conflicts G1-G8 (repo layout, cursor pagination, 400 vs 422, error code case, health paths, refresh TTL, /me, enum case) | agent | All ARD proposals accepted (docs/14 A) | 2026-11-27 |
+| Q-04 | Sign off the rules built where the ARD is silent (docs/14 E1-E9), above all E5/E6: who approves the finance head's own claim | agent (A-0007) | | |
 | Q-02 | (Superseded by the ARD section 13) Confirm assumptions A-1 to A-7 in docs/00 (limit breaches route, auto-approve max 5,000 INR, any reject rejects claim, tier-1 list, separation of duties, sample-audit hold, stale 90 days) | agent | | |
 
 ## 9. Change history of this plan
@@ -104,4 +105,5 @@ Break these down when the phase starts (use IDs `P2-xx`, `P3-xx`, `P4-xx`).
 | 2026-11-27 | D-004 decided (ADR-0008); P1-03 in review; contract-sync targets added ahead of P1-04 | agent (Claude) |
 | 2026-11-27 | ExpenseFlow use case received: Phase 2/3 broken down into P2-01..P2-10, P3-01..P3-08 (replacing the generic vertical-slice rows) | agent (Claude) |
 | 2026-11-27 | ARD received and adopted as the contract (ADR-0011); P2-02..P2-09 first cut built, being re-aligned to the ARD (docs/14 section B); P2-00 added for guideline conflicts | agent (Claude) |
+| 2026-11-27 | A-0007: backend re-aligned to the ARD; P2-00 done; P2-03..P2-10 in review; Q-04 added for the rules decided where the ARD is silent | agent (Claude) |
 | 2026-11-27 | Added P1-10 (agent skills, referenced by SKILLS.md and counted by PROGRESS.md); Prompt 11 written for P1-09/P1-10. Needs plan-owner approval (scope) | agent (Claude) |

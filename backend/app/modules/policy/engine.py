@@ -20,6 +20,18 @@ from typing import Any, Literal
 
 from app.modules.policy.schemas import PolicyRuleConfig, PolicySnapshot
 
+__all__ = [
+    "ClaimContext",
+    "Evaluation",
+    "Finding",
+    "LineInput",
+    "LineResult",
+    "PolicySnapshot",
+    "evaluate",
+    "inr",
+    "normalise_vendor",
+]
+
 LineStatus = Literal["AUTO_APPROVED", "NEEDS_APPROVAL", "AUTO_REJECTED"]
 ClaimOutcome = Literal["AUTO_APPROVED", "ROUTE", "REJECTED"]
 _WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -240,7 +252,10 @@ def _max_age_days(
     limit = int(rule.params["max_age_days"])
     return {
         ln.key: (
-            {"age_days": str((ctx.submitted_on - ln.expense_date).days), "max_age_days": str(limit)},
+            {
+                "age_days": str((ctx.submitted_on - ln.expense_date).days),
+                "max_age_days": str(limit),
+            },
             {},
         )
         for ln in lines
@@ -267,9 +282,9 @@ def _reason(template: str, values: dict[str, str]) -> str:
         return template[:500]
 
 
-def evaluate(
+def _apply_rules(
     lines: Sequence[LineInput], context: ClaimContext, snapshot: PolicySnapshot
-) -> Evaluation:
+) -> dict[str, LineResult]:
     results = {ln.key: LineResult(key=ln.key) for ln in lines}
     for rule in snapshot.rules:
         if not rule.active:
@@ -285,19 +300,32 @@ def evaluate(
                     force_level=rule.force_level,
                 )
             )
+    return results
 
-    amounts = {ln.key: ln.amount_paise for ln in lines}
+
+def _resolve_statuses(
+    results: dict[str, LineResult], amounts: dict[str, int], auto_approve_max: int
+) -> int:
+    """Set each line's status (ARD 5 steps 1-3) and return the payable total."""
     for res in results.values():
         if any(f.outcome == "REJECT" for f in res.findings):
             res.status = "AUTO_REJECTED"
         elif res.findings:
             res.status = "NEEDS_APPROVAL"
     payable = sum(amounts[k] for k, r in results.items() if r.status != "AUTO_REJECTED")
-    if payable > snapshot.auto_approve_max_total_paise:
+    if payable > auto_approve_max:
         for res in results.values():
             if res.status == "AUTO_APPROVED":
                 res.status = "NEEDS_APPROVAL"
+    return payable
 
+
+def evaluate(
+    lines: Sequence[LineInput], context: ClaimContext, snapshot: PolicySnapshot
+) -> Evaluation:
+    results = _apply_rules(lines, context, snapshot)
+    amounts = {ln.key: ln.amount_paise for ln in lines}
+    payable = _resolve_statuses(results, amounts, snapshot.auto_approve_max_total_paise)
     ordered = [results[ln.key] for ln in lines]
     total = sum(amounts.values())
     if ordered and all(r.status == "AUTO_REJECTED" for r in ordered):

@@ -8,7 +8,7 @@ from app.core.auth import ACCESS_COOKIE, CSRF_COOKIE, REFRESH_COOKIE
 from app.core.deps import DbSession, SettingsDep
 from app.core.errors import UnauthenticatedError, error_json, error_responses, request_id_of
 from app.modules.auth.deps import AuthServiceDep
-from app.modules.auth.schemas import LoginRequest
+from app.modules.auth.schemas import LoginRequest, RegisterRequest, RegisterResult
 from app.modules.auth.service import IssuedTokens
 from app.modules.org.schemas import MeRead
 from app.modules.org.service import org_service
@@ -65,6 +65,20 @@ def login(
         )
     _set_cookies(response, result.tokens, _secure(settings.app_env))
     return org_service(session).me(result.user_id)
+
+
+@router.post(
+    "/register",
+    response_model=RegisterResult,
+    status_code=status.HTTP_202_ACCEPTED,
+    operation_id="auth_register",
+    summary="Self-register as an EMPLOYEE; the account is inactive until the finance head "
+    "activates it (same answer whether or not the email exists)",
+    responses=error_responses(400, 403, 429, 500),
+)
+def register(body: RegisterRequest, request: Request, service: AuthServiceDep) -> RegisterResult:
+    client = request.client.host if request.client else "unknown"
+    return service.register(body, client)
 
 
 @router.post(

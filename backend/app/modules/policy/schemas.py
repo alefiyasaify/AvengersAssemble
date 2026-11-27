@@ -63,7 +63,7 @@ class PolicyRuleConfig(BaseModel):
             if not isinstance(value, kind) or isinstance(value, bool):
                 msg = f"rule {self.code}: param '{name}' must be a {kind.__name__}"
                 raise ValueError(msg)
-            if kind is int and value < 0:
+            if isinstance(value, int) and value < 0:
                 msg = f"rule {self.code}: param '{name}' must not be negative"
                 raise ValueError(msg)
         if self.type in _NEEDS_CATEGORY and not self.category:

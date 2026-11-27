@@ -16,7 +16,11 @@ Status values: `todo`, `in-progress`, `blocked`, `done`, `dropped`. Move finishe
 | AI-006 | Install pnpm (`winget install pnpm.pnpm` or `scripts/install-prereqs.ps1`) before P1-03; start Docker Desktop before P1-06 | | infra | | in-progress | pnpm done (12.23); Docker daemon still stopped |
 | AI-007 | Move the frontend CSP to per-request nonces (proxy.ts) and drop `'unsafe-inline'` scripts; requires dynamic rendering, measure the cost | | frontend | | todo | ADR-0008 |
 | AI-009 | Implement `scripts/progress.py` + `make progress` so the PROGRESS.md snapshot is generated, not hand-written | | infra | | todo | Prompt 11, P1-09 |
-| AI-010 | Re-align backend domain to the ARD (docs/14 section B), then write integration tests; coverage gate currently fails (63.96% < 85%) | | backend | | todo | A-0006, ADR-0011 |
+| AI-010 | Re-align backend domain to the ARD (docs/14 section B), then write integration tests; coverage gate currently fails (63.96% < 85%) | | backend | | done | A-0007: 168 tests, coverage 86.97%; remaining gaps listed in docs/14 E |
+| AI-012 | Regenerate the frontend client from the new `backend/openapi.json` (`make gen-contract`, fix `make typecheck`) in a frontend PR with label `contract-change` | | frontend | | todo | A-0007; `make check-contract` fails until then |
+| AI-013 | Store `Idempotency-Key` + response for 24 h on mutating endpoints (ARD 7, C12) | | backend | | todo | A-0007, docs/14 E |
+| AI-014 | Integration tests for auth (login/lockout/refresh), org admin and policy admin endpoints (coverage 33-52% in those services) | | backend | | todo | A-0007 |
+| AI-015 | Team sign-off on docs/14 E1-E9 (rules built where the ARD is silent) | | docs | | todo | PLAN Q-04 |
 | AI-011 | Frontend features per ARD section 9 after the API matches the ARD | | frontend | | todo | docs/14 section D |
 | AI-008 | Real-browser check of the home page status card (deferred: Edge would not launch under automation here); cover it in the P1-05 smoke spec | | tests | | todo | A-0004 |
 
@@ -117,3 +121,48 @@ IDs: take the next number after the last entry. If two entries collide after a m
 - Verification: policy tests 35 passed; `make lint` pass (ruff + 13/13 import contracts kept); `make typecheck` pass (mypy strict, 115 files); `make test` 98 passed but FAILS the coverage gate (63.96% < 85%) because the domain modules have no integration tests yet; migration upgrade/downgrade round trip pass; audit triggers block UPDATE/DELETE (checked with sqlite3)
 - Follow-ups: P2-00 / Q-03 (ARD conflicts), AI-010, AI-011
 
+### A-0007 | 2026-11-27 | backend | Backend re-aligned to the ARD: claims, approvals, payouts, reports, seed
+- By: agent (Claude Code, claude-opus-5-5) on behalf of a team member
+- Type: feat
+- Plan refs: P2-00, P2-03..P2-10, AI-010, Q-03, Q-04
+- Branch / PR / commits: branch `feat/P2-05-ard-backend-domain` (local, not committed or pushed)
+- What changed: The pulled `main` (58e59e1) had the ARD schema, models and engine but no claims/approvals/payouts/reports services or routers, so `app.main` did not import and lint/mypy failed (21/23 errors). Added `claims/{service,chain,router,deps}.py` (lifecycle, submit/resubmit/withdraw, policy-preview, timeline, comments, receipt download with claim-based authorisation, chain with frozen levels, escalation, separation of duties, delegation, sample audit, bulk approve, review queue, reassign), `approvals/{service,router,deps}.py` (facade), `payouts/{schemas,repository,service,router,deps}.py` (maker-checker, ARD CSV, SHA-256, cancel), `reports/{schemas,service,router,deps}.py` (role-scoped dashboard), `/healthz` + `/readyz` (G5), `app/seeds/generate.py` + `seed_manifest.json` + `make seed`. Fixed stale code: offset pagination and lowercase error codes in `_template`/tests (G2/G4), `conftest.py` seeding call and roles, mypy errors in the claims repository and policy schemas, `policy.engine.evaluate` split for complexity. Added `tzdata` (Asia/Kolkata on Windows and slim images). Rules the ARD leaves open are recorded in docs/14 E. Deleted the agent's own duplicate scaffold `expenseflow/` and draft `docs/architecture/erd.md` (both untracked; the ARD and `backend/` supersede them).
+- Files/areas touched: backend/app/modules/{claims,approvals,payouts,reports,health,_template,policy,audit,auth,org,receipts}, backend/app/core/{auth,middleware}.py, backend/app/main.py, backend/app/seeds, backend/conftest.py, backend/tests, backend/pyproject.toml, backend/uv.lock, backend/Makefile, backend/openapi.json, Makefile, CLAUDE.md, backend/CLAUDE.md, docs/01, 02, 06, 08, 11, 14, PLAN.md. `frontend/` not touched.
+- Contract impact: additive and breaking-vs-committed-spec (the committed spec still had pre-ARD shapes): 53 paths now; needs label `contract-change`; frontend client NOT regenerated (AI-012)
+- Migration: none (uses 0f946151ac98; single head)
+- Dependencies: + `tzdata` (runtime): Python's zoneinfo has no timezone database on Windows or slim images, and the ARD's IST day/weekend rules need Asia/Kolkata
+- Verification (run in backend/): `ruff check .`: pass; `ruff format --check .`: pass; `lint-imports`: 13 kept, 0 broken; `mypy`: no issues in 122 files; `pytest --cov`: 168 passed, coverage 86.97% (gate 85%); `python -m scripts.export_openapi --check`: up to date; `alembic heads`: one head; `pip-audit --skip-editable`: no known vulnerabilities; full seed on a scratch DB: 3,016 claims (2,064 PAID, 616 APPROVED, 275 REJECTED, 36 SENT_BACK, 25 pending), 9 batches, 383/383 planted cases detected, audit chain valid over 22,325 events, dashboard summary 166 ms. NOT run: `make` targets themselves (GNU make is not installed on this machine; the same commands were run with `uv run`), `make check-contract` (fails by design until AI-012), frontend checks, e2e (P1-05).
+- Follow-ups: AI-012, AI-013, AI-014, AI-015 (PLAN Q-04); P3-08 for `/metrics` and the nightly audit-chain job
+
+### A-0008 | 2026-11-27 | backend | requirements.txt for pip users
+- By: agent (Claude Code, claude-opus-5-5) on behalf of a team member
+- Type: chore
+- Plan refs: P2-10 (demo setup)
+- Branch / PR / commits: branch `feat/P2-05-ard-backend-domain` (local, not committed)
+- What changed: `backend/requirements.txt` (runtime) and `backend/requirements-dev.txt` (runtime + dev) exported from `uv.lock`; `make requirements` target; plain venv + pip steps in docs/11; backend/CLAUDE.md command list.
+- Contract impact: none
+- Migration: none
+- Verification: fresh Python 3.12 venv, `pip install -r requirements-dev.txt`: pass; `alembic upgrade head` on an empty DB: pass; in-process `/readyz` 200 with database ok, `/docs` 200, `/api/v1/claims` 401 unauthenticated; `pytest tests/test_app.py` in that venv: 6 passed
+- Follow-ups: none
+
+### A-0009 | 2026-11-27 | backend | Seed applies migrations itself
+- By: agent (Claude Code, claude-opus-5-5) on behalf of a team member
+- Type: fix
+- Plan refs: P2-10
+- Branch / PR / commits: branch `feat/P2-05-ard-backend-domain` (local, not committed)
+- What changed: `python -m app.seeds.generate` failed with `no such table: users` on a database that had not been migrated (reported by a team member following the onboarding steps). The seed now runs `alembic upgrade head` first; docs/11 corrected.
+- Contract impact: none
+- Migration: none
+- Verification: `migrate()` twice on a fresh SQLite file creates the tables and is idempotent; `pytest tests/test_seed.py`: 1 passed; `mypy`: no issues
+- Follow-ups: none
+
+### A-0010 | 2026-11-27 | backend | Self-registration API
+- By: agent (Claude Code, claude-opus-5-5) on behalf of a team member
+- Type: feat
+- Plan refs: P2-02 (auth), docs/14 E10
+- Branch / PR / commits: branch `feat/P2-05-ard-backend-domain` (local, not committed)
+- What changed: `POST /api/v1/auth/register` (auth router/service, `org.service.self_register`): inactive EMPLOYEE, no role input, enumeration-safe 202, per-client rate limit shared with sign-in, audited `user.registered`; setting `SELF_REGISTRATION_ENABLED` (+ .env.example); `GET /admin/users` gains `pending=true` and matches email (admin only). Docs 02, 08, 14 updated.
+- Contract impact: additive (`auth_register`; `pending` query param); openapi.json regenerated; frontend client still pending (AI-012)
+- Migration: none
+- Verification: `pytest app/modules/auth app/modules/org`: 9 passed; full `pytest --cov`: 177 passed, coverage 89.99%; `ruff check`, `ruff format --check`, `lint-imports` (13 kept), `mypy` (123 files), `export_openapi --check`: pass
+- Follow-ups: none new

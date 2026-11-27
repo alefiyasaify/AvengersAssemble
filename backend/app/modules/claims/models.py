@@ -161,9 +161,7 @@ class ApprovalStep(IdMixin, Base):
     role: Mapped[str] = mapped_column(String(16))
     assigned_to_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     acted_by_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
-    on_behalf_of_id: Mapped[str | None] = mapped_column(
-        ForeignKey("users.id", ondelete="RESTRICT")
-    )
+    on_behalf_of_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     status: Mapped[str] = mapped_column(String(12), default="PENDING", index=True)
     comment: Mapped[str | None] = mapped_column(String(2000))
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
@@ -206,9 +204,7 @@ class SampleAudit(IdMixin, Base):
     __tablename__ = "sample_audits"
     __table_args__ = (CheckConstraint(_in("status", SAMPLE_STATUSES), name="status_valid"),)
 
-    claim_id: Mapped[str] = mapped_column(
-        ForeignKey("claims.id", ondelete="CASCADE"), unique=True
-    )
+    claim_id: Mapped[str] = mapped_column(ForeignKey("claims.id", ondelete="CASCADE"), unique=True)
     selected_at: Mapped[datetime] = mapped_column(default=utcnow)
     draw_value: Mapped[float]
     rate: Mapped[float]

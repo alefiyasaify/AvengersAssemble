@@ -96,8 +96,9 @@ def admin_list_users(
     service: OrgServiceDep,
     page: PageDep,
     q: Annotated[str, Query(max_length=100)] = "",
+    pending: bool = False,
 ) -> Page[UserRead]:
-    return service.admin_list(principal, q, page)
+    return service.admin_list(principal, q, page, pending=pending)
 
 
 @router.post(

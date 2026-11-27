@@ -47,7 +47,7 @@ def service() -> ExampleService:
 def test_create_example_returns_read_model_when_valid(service: ExampleService) -> None:
     created = service.create_example(ExampleCreate(name="first"))
     assert created.name == "first"
-    assert service.list_examples(PageParams()).total == 1
+    assert service.list_examples(PageParams()).total_estimate == 1
 
 
 def test_get_example_raises_not_found_when_missing(service: ExampleService) -> None:

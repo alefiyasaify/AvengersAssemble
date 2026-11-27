@@ -58,7 +58,7 @@ def _check_csrf(request: Request) -> None:
     cookie = request.cookies.get(CSRF_COOKIE, "")
     header = request.headers.get(CSRF_HEADER, "")
     if not cookie or not hmac.compare_digest(cookie, header):
-        raise PermissionDeniedError("Missing or invalid CSRF token.", code="csrf_failed")
+        raise PermissionDeniedError("Missing or invalid CSRF token.", code="CSRF_FAILED")
 
 
 def principal_from_request(request: Request, settings: Settings) -> Principal:
