@@ -1,46 +1,60 @@
-import {
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  SearchOutlined,
-  UserSwitchOutlined,
-} from "@ant-design/icons";
-import { Badge, Button, Dropdown, Input, Tooltip } from "antd";
+import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Input, Tooltip } from "antd";
 import { NavLink, useNavigate } from "react-router-dom";
 
-import { ROLE_HOME, useRole } from "../../context/RoleContext";
+import { useAuth } from "../../context/AuthContext";
 import { BrandLogo } from "../common/BrandLogo";
 import { InitialsAvatar } from "../common/InitialsAvatar";
 import { KeyboardKey } from "../common/KeyboardKey";
-import { SIDEBAR_LINKS } from "./sidebarLinks";
+import { MY_EXPENSE_LINKS, SIDEBAR_LINKS } from "./sidebarLinks";
+
+function NavGroup({ title, links, collapsed, onNavigate }) {
+  return (
+    <div>
+      {collapsed ? null : <div className="ef-nav-label">{title}</div>}
+      <div className="ef-nav">
+        {links.map(({ to, label, icon: Icon, end }) => {
+          const link = (
+            <NavLink key={to} to={to} end={end} onClick={onNavigate} aria-label={collapsed ? label : undefined}>
+              <span className="tile">
+                <Icon />
+              </span>
+              {collapsed ? null : <span style={{ flex: 1 }}>{label}</span>}
+            </NavLink>
+          );
+          return collapsed ? (
+            <Tooltip key={to} title={label} placement="right">
+              {link}
+            </Tooltip>
+          ) : (
+            link
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 /**
- * Left navigation: logo, search, the role's links, and the user card with the role switcher.
+ * Left navigation: logo, search, the role's links, and the signed-in user card (sign out).
  * collapsed = slim icon-only rail (labels move into tooltips).
  * onToggleCollapse is only passed on desktop; the mobile drawer has no collapse button.
  */
 export function Sidebar({ collapsed = false, onToggleCollapse, onNavigate }) {
-  const { role, user, setRole } = useRole();
+  const { role, user, logout } = useAuth();
   const navigate = useNavigate();
 
   const userMenu = {
     items: [
-      { key: "who", label: `${user.name} · ${user.title}`, disabled: true },
-      { type: "divider" },
-      ...Object.keys(ROLE_HOME)
-        .filter((r) => r !== role)
-        .map((r) => ({ key: r, icon: <UserSwitchOutlined />, label: `Switch to ${r === "head" ? "finance head" : r}` })),
+      { key: "who", label: `${user.name} · ${user.email}`, disabled: true },
       { type: "divider" },
       { key: "logout", icon: <LogoutOutlined />, label: "Sign out", danger: true },
     ],
-    onClick: ({ key }) => {
+    onClick: async ({ key }) => {
       if (key === "logout") {
-        setRole(null);
+        await logout();
         navigate("/");
-        return;
       }
-      setRole(key);
-      navigate(ROLE_HOME[key]);
     },
   };
 
@@ -80,46 +94,21 @@ export function Sidebar({ collapsed = false, onToggleCollapse, onNavigate }) {
         />
       )}
 
-      <nav aria-label="Main">
-        {collapsed ? null : <div className="ef-nav-label">WORKSPACE</div>}
-        <div className="ef-nav">
-          {(SIDEBAR_LINKS[role] ?? []).map(({ to, label, icon: Icon, badge, end }) => {
-            const link = (
-              <NavLink key={to} to={to} end={end} onClick={onNavigate} aria-label={collapsed ? label : undefined}>
-                <span className="tile">
-                  {collapsed && badge ? (
-                    <Badge dot color="#2563EB" offset={[2, -2]}>
-                      <Icon />
-                    </Badge>
-                  ) : (
-                    <Icon />
-                  )}
-                </span>
-                {collapsed ? null : <span style={{ flex: 1 }}>{label}</span>}
-                {!collapsed && badge ? <span className="count">{badge}</span> : null}
-              </NavLink>
-            );
-            return collapsed ? (
-              <Tooltip key={to} title={badge ? `${label} · ${badge}` : label} placement="right">
-                {link}
-              </Tooltip>
-            ) : (
-              link
-            );
-          })}
-        </div>
+      <nav aria-label="Main" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        <NavGroup title="WORKSPACE" links={SIDEBAR_LINKS[role] ?? []} collapsed={collapsed} onNavigate={onNavigate} />
+        {role !== "employee" ? <NavGroup title="MY EXPENSES" links={MY_EXPENSE_LINKS} collapsed={collapsed} onNavigate={onNavigate} /> : null}
       </nav>
 
       <Dropdown menu={userMenu} trigger={["click"]} placement="topLeft">
-        <button type="button" className="ef-user" aria-label={`${user.name}, switch role`}>
+        <button type="button" className="ef-user" aria-label={`${user.name}, account menu`}>
           <InitialsAvatar text={user.initials} size={40} filled style={{ boxShadow: "0 0 0 3px #DCE6FF" }} />
           {collapsed ? null : (
             <>
               <span style={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0, flex: 1 }}>
-                <span style={{ fontSize: 14, fontWeight: 700 }}>{user.name}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</span>
                 <span style={{ fontSize: 12, color: "#5B6475" }}>{user.title}</span>
               </span>
-              <UserSwitchOutlined style={{ color: "#5B6475" }} />
+              <LogoutOutlined style={{ color: "#5B6475" }} />
             </>
           )}
         </button>

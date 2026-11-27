@@ -5,7 +5,7 @@ export const CATEGORIES = {
   MEALS: { label: "Meals", Icon: CoffeeOutlined, bg: "#FFEBC2", fg: "#7A4200" },
   HOTEL: { label: "Hotel", Icon: HomeOutlined, bg: "#E1EAFF", fg: "#1D4ED8" },
   LOCAL_CAB: { label: "Local cab", Icon: CarOutlined, bg: "#EAE5FF", fg: "#4B2FB5" },
-  AIR: { label: "Air travel", Icon: SendOutlined, bg: "#DDF4E7", fg: "#0B6B42" },
+  TRAVEL: { label: "Travel", Icon: SendOutlined, bg: "#DDF4E7", fg: "#0B6B42" },
   OTHER: { label: "Other", Icon: TagOutlined, bg: "#ECEFF5", fg: "#4A5366" },
 };
 

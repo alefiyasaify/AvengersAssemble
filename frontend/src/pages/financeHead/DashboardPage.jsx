@@ -1,50 +1,69 @@
-import { ArrowDownOutlined, ArrowUpOutlined,CheckOutlined, RightOutlined, SafetyOutlined, SlidersOutlined, WalletOutlined } from "@ant-design/icons";
+import { CheckOutlined, RightOutlined, SafetyOutlined, WalletOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Segmented } from "antd";
+import { Button, Empty, Segmented } from "antd";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getDashboardSummary } from "../../api/expenseApi";
-import { TopBar } from "../../components/layout/TopBar";
-import { StatusChip } from "../../components/common/StatusChip";
+import { getDashboardSummary } from "../../api/dashboardApi";
 import { HorizontalBarList } from "../../components/charts/HorizontalBarList";
+import { Sparkline } from "../../components/charts/Sparkline";
 import { LoadingOrError } from "../../components/common/LoadingOrError";
 import { SectionTitle } from "../../components/common/SectionTitle";
-import { Sparkline } from "../../components/charts/Sparkline";
-import { useRole } from "../../context/RoleContext";
-import { formatLakh } from "../../utils/formatMoney";
+import { StatusChip } from "../../components/common/StatusChip";
+import { TopBar } from "../../components/layout/TopBar";
+import { useAuth } from "../../context/AuthContext";
+import { useCategories } from "../../hooks/useLookups";
+import { formatINR, formatLakh } from "../../utils/formatMoney";
+import { ROLE_NAME, ruleLabel } from "../../utils/statusLabels";
 
-const ATT = {
-  HIGH_VALUE: { Icon: SafetyOutlined, bg: "#FCE0DC", fg: "#A5271B" },
-  BATCH: { Icon: WalletOutlined, bg: "#DDF4E7", fg: "#0B6B42" },
-  POLICY: { Icon: SlidersOutlined, bg: "#FFEBC2", fg: "#7A4200" },
-};
 const PERIOD_WORD = { MONTH: "month", QUARTER: "quarter", YEAR: "year" };
-const CAT_COLORS =["#1E3A8A", "#2563EB", "#60A5FA", "#BFDBFE", "#F2A33A"];
+const CAT_COLORS = ["#1E3A8A", "#2563EB", "#60A5FA", "#BFDBFE", "#F2A33A", "#94A3B8"];
+const toLakh = (paise) => paise / 100 / 100000;
+const ymd = (d) => d.format("YYYY-MM-DD");
 
-function StackedMonths({ months, categories }) {
-  const max = Math.max(...months.map((m) => m.lakh.reduce((a, b) => a + b, 0)));
+/** from/to for the period toggle (dates in the company timezone are close enough for a range filter). */
+function periodRange(period) {
+  const today = dayjs();
+  const start = period === "YEAR" ? today.startOf("year") : period === "QUARTER" ? today.month(Math.floor(today.month() / 3) * 3).startOf("month") : today.startOf("month");
+  return { from: ymd(start), to: ymd(today) };
+}
+
+/** spend_by_month rows ({ month, category, amount_paise }) → one stacked bar per month. */
+function stackMonths(rows, categoryOrder) {
+  const months = [...new Set(rows.map((r) => r.month))].sort();
+  return months.map((month) => {
+    const byCat = Object.fromEntries(categoryOrder.map((c) => [c, 0]));
+    rows.filter((r) => r.month === month).forEach((r) => (byCat[r.category] = (byCat[r.category] ?? 0) + r.amount_paise));
+    return { month, label: dayjs(`${month}-01`).format("MMM"), values: categoryOrder.map((c) => toLakh(byCat[c] ?? 0)) };
+  });
+}
+
+function StackedMonths({ rows, categoryOrder, categoryName }) {
+  const months = stackMonths(rows, categoryOrder);
+  if (!months.length) return <Empty description="No spend in the last six months" />;
+  const max = Math.max(...months.map((m) => m.values.reduce((a, b) => a + b, 0)), 0.01);
   return (
     <>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", fontSize: 12, color: "#3F4859" }}>
-        {categories.map((c, i) => (
+        {categoryOrder.map((c, i) => (
           <span key={c} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 2, background: CAT_COLORS[i] }} />
-            {c}
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: CAT_COLORS[i % CAT_COLORS.length] }} />
+            {categoryName(c)}
           </span>
         ))}
       </div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 260 }}>
         {months.map((m) => {
-          const total = m.lakh.reduce((a, b) => a + b, 0);
+          const total = m.values.reduce((a, b) => a + b, 0);
           return (
-            <div key={m.label} role="img" aria-label={`${m.label}, ${total.toFixed(1)} lakh`} style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
+            <div key={m.month} role="img" aria-label={`${m.label}, ${total.toFixed(1)} lakh`} style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
               <span className="num" style={{ fontSize: 12, fontWeight: 600 }}>
                 {total.toFixed(1)}
               </span>
               <span style={{ display: "flex", flexDirection: "column-reverse", width: "100%", maxWidth: 64, borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
-                {m.lakh.map((v, i) => (
-                  <span key={i} style={{ display: "block", width: "100%", background: CAT_COLORS[i], height: Math.max(2, Math.round((v / max) * 200)) }} />
+                {m.values.map((v, i) => (
+                  <span key={i} style={{ display: "block", width: "100%", background: CAT_COLORS[i % CAT_COLORS.length], height: v ? Math.max(2, Math.round((v / max) * 200)) : 0 }} />
                 ))}
               </span>
               <span style={{ fontSize: 12, color: "#5B6475" }}>{m.label}</span>
@@ -56,15 +75,28 @@ function StackedMonths({ months, categories }) {
   );
 }
 
-function DashboardBody({ d, period, setPeriod }) {
+const hours = (h) => (h === null || h === undefined ? "–" : h >= 48 ? `${(h / 24).toFixed(1)} days` : `${h.toFixed(1)} h`);
+
+function DashboardBody({ d, trend, period, setPeriod }) {
   const navigate = useNavigate();
-  const { user } = useRole();
-  const changePct = ((d.spend.current_paise - d.spend.previous_paise) / d.spend.previous_paise) * 100;
-  const o = d.outcomes;
+  const { user } = useAuth();
+  const categories = useCategories();
+  const categoryName = (code) => categories.byCode[code] ?? code;
   const periodWord = PERIOD_WORD[period];
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const todayText = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  const spendTotal = d.spend_by_category.reduce((s, c) => s + c.amount_paise, 0);
+  const monthTotals = trend ? stackMonths(trend.spend_by_month, [...new Set(trend.spend_by_month.map((r) => r.category))]).map((m) => m.values.reduce((a, b) => a + b, 0)) : [];
+  const at = d.approval_time;
+  const decided = at.auto_approved_count + at.chain_count;
+  const autoPct = decided ? Math.round((at.auto_approved_count / decided) * 100) : 0;
+  const flagsTotal = d.violations.by_rule.reduce((s, r) => s + r.count, 0);
+  const queue = d.queue_health ?? [];
+  const headQueue = queue.find((q) => q.role === "FINANCE_HEAD");
+  const oldest = queue.filter((q) => q.oldest_age_seconds).sort((a, b) => b.oldest_age_seconds - a.oldest_age_seconds)[0];
+  const categoryOrder = trend ? [...new Set(trend.spend_by_month.map((r) => r.category))] : [];
 
   return (
     <div className="ef-page" style={{ gap: 30, paddingTop: 14 }}>
@@ -73,7 +105,9 @@ function DashboardBody({ d, period, setPeriod }) {
           <h1>
             {greeting}, {user.name.split(" ")[0]}
           </h1>
-          <p>{todayText}. Figures are mock data until GET /dashboard/summary is live.</p>
+          <p>
+            {todayText}. Showing {d.scope === "company" ? "the whole company" : d.scope === "team" ? "your team" : "your own claims"}, {dayjs(d.date_from).format("D MMM")} to {dayjs(d.date_to).format("D MMM YYYY")}.
+          </p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Segmented aria-label="Period" value={period} onChange={setPeriod} options={[{ label: "Month", value: "MONTH" }, { label: "Quarter", value: "QUARTER" }, { label: "Year", value: "YEAR" }]} style={{ border: "1px solid #D5D9E3", padding: 2 }} />
@@ -81,29 +115,41 @@ function DashboardBody({ d, period, setPeriod }) {
         </div>
       </div>
 
-      <section style={{ display: "flex", flexDirection: "column", gap: 10 }} aria-labelledby="att">
-        <span id="att" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".08em", color: "#5B6475" }}>
-          NEEDS YOUR ATTENTION
-        </span>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
-          {d.attention.map((a) => {
-            const { Icon, bg, fg } = ATT[a.kind];
-            return (
-              <button key={a.kind} type="button" className="att" onClick={() => navigate(a.to)}>
-                <span className="tile" style={{ background: bg, color: fg }}>
-                  <Icon />
+      {headQueue?.pending || d.sample_audit?.pending ? (
+        <section style={{ display: "flex", flexDirection: "column", gap: 10 }} aria-labelledby="att">
+          <span id="att" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".08em", color: "#5B6475" }}>
+            NEEDS ATTENTION
+          </span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
+            {headQueue?.pending ? (
+              <button type="button" className="att" onClick={() => navigate("/head/approvals")}>
+                <span className="tile" style={{ background: "#FCE0DC", color: "#A5271B" }}>
+                  <SafetyOutlined />
                 </span>
                 <span style={{ flex: 1 }}>
-                  {a.title}
+                  {headQueue.pending} high-value claim{headQueue.pending > 1 ? "s are" : " is"} waiting for you
                   <br />
-                  <span style={{ fontWeight: 500, fontSize: 12, color: "#5B6475" }}>{a.detail}</span>
+                  <span style={{ fontWeight: 500, fontSize: 12, color: "#5B6475" }}>Oldest {Math.round((headQueue.oldest_age_seconds ?? 0) / 86400)} days</span>
                 </span>
                 <RightOutlined style={{ color: "#5B6475" }} />
               </button>
-            );
-          })}
-        </div>
-      </section>
+            ) : null}
+            {d.sample_audit?.pending ? (
+              <button type="button" className="att" onClick={() => navigate("/head/payouts")}>
+                <span className="tile" style={{ background: "#FFEBC2", color: "#7A4200" }}>
+                  <WalletOutlined />
+                </span>
+                <span style={{ flex: 1 }}>
+                  {d.sample_audit.pending} sampled claim{d.sample_audit.pending > 1 ? "s are" : " is"} held from payout
+                  <br />
+                  <span style={{ fontWeight: 500, fontSize: 12, color: "#5B6475" }}>Until the auditor passes or fails them</span>
+                </span>
+                <RightOutlined style={{ color: "#5B6475" }} />
+              </button>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 20, alignItems: "stretch" }}>
         <section className="hero" style={{ flex: "1.3 1 420px", minWidth: 0, padding: 28, gap: 14 }} aria-label={`Spend this ${periodWord}`}>
@@ -113,14 +159,13 @@ function DashboardBody({ d, period, setPeriod }) {
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 16 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <span className="num" style={{ fontSize: 64, lineHeight: 1, fontWeight: 800, letterSpacing: "-0.03em" }}>
-                {formatLakh(d.spend.current_paise)}
+                {formatLakh(spendTotal)}
               </span>
-              <span className="pill" style={{ alignSelf: "flex-start", fontSize: 13, display: "inline-flex", gap: 6, alignItems: "center" }}>
-                {changePct <= 0 ? <ArrowDownOutlined /> : <ArrowUpOutlined />} {Math.abs(changePct).toFixed(1)}% {changePct <= 0 ? "below" : "above"}{" "}
-                {d.spend.previous_label}’s {formatLakh(d.spend.previous_paise)}
+              <span className="pill" style={{ alignSelf: "flex-start", fontSize: 13 }}>
+                {formatINR(spendTotal)} across {d.spend_by_category.length} categories
               </span>
             </div>
-            <Sparkline values={d.spend.trend_lakh} width={300} height={70} color="#FFFFFF" area label="Spend over the last six months" />
+            {monthTotals.length > 1 ? <Sparkline values={monthTotals} width={300} height={70} color="#FFFFFF" area label="Spend over the last six months" /> : null}
           </div>
         </section>
 
@@ -128,142 +173,142 @@ function DashboardBody({ d, period, setPeriod }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span style={{ fontSize: 13, color: "#5B6475", fontWeight: 600 }}>Policy flags</span>
             <span className="num" style={{ fontSize: 40, lineHeight: 1, fontWeight: 800 }}>
-              {d.flags.total}
+              {flagsTotal}
             </span>
-            <Sparkline values={d.flags.trend} color="#E59A12" label="Flags per week" />
             <span style={{ fontSize: 12, color: "#5B6475" }}>
-              {d.flags.by_type.OVER_LIMIT} over limit · {d.flags.by_type.WEEKEND} weekend · {d.flags.by_type.DUPLICATE} duplicate · {d.flags.by_type.NO_RECEIPT} no receipt
+              {(d.violations.violation_rate * 100).toFixed(1)}% of {d.violations.submitted_lines} submitted lines
             </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span style={{ fontSize: 13, color: "#5B6475", fontWeight: 600 }}>Average approval time</span>
             <span className="num" style={{ fontSize: 40, lineHeight: 1, fontWeight: 800 }}>
-              {d.approval_time.mean_days} days
+              {hours(at.mean_hours)}
             </span>
-            <Sparkline values={d.approval_time.trend} label="Approval time trend, falling" />
             <span style={{ fontSize: 12, color: "#5B6475" }}>
-              Median {d.approval_time.median_days} · p90 {d.approval_time.p90_days} · auto-approved reported apart
+              Median {hours(at.median_hours)} · p90 {hours(at.p90_hours)} · auto-approved reported apart
             </span>
           </div>
-          <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: 6, background: "#FFF1EF", borderRadius: 16, padding: "14px 16px" }}>
-            <span style={{ fontSize: 13, color: "#A5271B", fontWeight: 700 }}>Oldest pending claim</span>
-            <span style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-              <span className="num" style={{ fontSize: 28, fontWeight: 800, color: "#A5271B" }}>
-                {d.oldest_pending.days} days
+          {oldest ? (
+            <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: 6, background: "#FFF1EF", borderRadius: 16, padding: "14px 16px" }}>
+              <span style={{ fontSize: 13, color: "#A5271B", fontWeight: 700 }}>Oldest pending step</span>
+              <span style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+                <span className="num" style={{ fontSize: 28, fontWeight: 800, color: "#A5271B" }}>
+                  {Math.round(oldest.oldest_age_seconds / 86400)} days
+                </span>
+                <span style={{ fontSize: 13, color: "#5B6475" }}>waiting on the {(ROLE_NAME[oldest.role] ?? oldest.role).toLowerCase()} step</span>
               </span>
-              <span style={{ fontSize: 13, color: "#5B6475" }}>
-                {d.oldest_pending.claim_no} · waiting on {d.oldest_pending.with}
-              </span>
-            </span>
-          </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
       <div className="band">
         <div className="col" style={{ flex: "1.4 1 480px" }}>
-          <SectionTitle title="Spend by month" hint="₹ lakh, stacked by category" />
-          <StackedMonths months={d.by_month} categories={d.categories} />
+          <SectionTitle title="Spend by month" hint="₹ lakh, last six months, stacked by category" />
+          {trend ? <StackedMonths rows={trend.spend_by_month} categoryOrder={categoryOrder} categoryName={categoryName} /> : <Empty />}
         </div>
         <div className="col" style={{ flex: "1 1 340px" }}>
-          <SectionTitle title="Claim outcomes" hint={`${o.total} claims this ${periodWord}`} />
-          <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
-            <div role="img" aria-label={`${o.auto_approved_pct}% auto-approved, ${o.routed_pct}% routed, ${o.auto_rejected_pct}% auto-rejected`} style={{ position: "relative", width: 170, height: 170, flex: "none" }}>
-              <div style={{ width: 170, height: 170, borderRadius: "50%", background: `conic-gradient(#1E40AF 0 ${o.auto_approved_pct}%, #60A5FA ${o.auto_approved_pct}% ${o.auto_approved_pct + o.routed_pct}%, #CBD5E1 ${o.auto_approved_pct + o.routed_pct}% 100%)` }} />
-              <div style={{ position: "absolute", left: 30, top: 30, width: 110, height: 110, borderRadius: "50%", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                <span className="num" style={{ fontSize: 24, fontWeight: 700 }}>
-                  {o.auto_approved_pct}%
+          <SectionTitle title="Claim outcomes" hint={`${decided} decided claims this ${periodWord}`} />
+          {decided ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
+              <div role="img" aria-label={`${autoPct}% auto-approved, ${100 - autoPct}% through the approval chain`} style={{ position: "relative", width: 170, height: 170, flex: "none" }}>
+                <div style={{ width: 170, height: 170, borderRadius: "50%", background: `conic-gradient(#1E40AF 0 ${autoPct}%, #60A5FA ${autoPct}% 100%)` }} />
+                <div style={{ position: "absolute", left: 30, top: 30, width: 110, height: 110, borderRadius: "50%", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <span className="num" style={{ fontSize: 24, fontWeight: 700 }}>
+                    {autoPct}%
+                  </span>
+                  <span style={{ fontSize: 11, color: "#5B6475" }}>auto-approved</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 3, background: "#1E40AF" }} />
+                  Auto-approved · {at.auto_approved_count}
                 </span>
-                <span style={{ fontSize: 11, color: "#5B6475" }}>auto-approved</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 3, background: "#60A5FA" }} />
+                  Through the approval chain · {at.chain_count}
+                </span>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
-              {[
-                ["#1E40AF", `Auto-approved · ${o.auto_approved_pct}%`],
-                ["#60A5FA", `Routed for approval · ${o.routed_pct}%`],
-                ["#CBD5E1", `Auto-rejected · ${o.auto_rejected_pct}%`],
-              ].map(([c, l]) => (
-                <span key={l} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ width: 12, height: 12, borderRadius: 3, background: c }} />
-                  {l}
-                </span>
-              ))}
-            </div>
-          </div>
+          ) : (
+            <Empty description="No decided claims yet" />
+          )}
         </div>
       </div>
 
       <div className="band">
         <div className="col" style={{ flex: "1 1 380px" }}>
           <SectionTitle title="Spend by category" hint={`₹ lakh, this ${periodWord}`} />
-          <HorizontalBarList rows={d.by_category} unit="lakh" />
+          {d.spend_by_category.length ? <HorizontalBarList rows={d.spend_by_category.map((c) => [categoryName(c.category), toLakh(c.amount_paise)])} unit="lakh" /> : <Empty />}
         </div>
         <div className="col" style={{ flex: "1 1 380px" }}>
           <SectionTitle title="Spend by department" hint={`₹ lakh, this ${periodWord}`} />
-          <HorizontalBarList rows={d.by_department} unit="lakh" />
+          {d.spend_by_department.length ? <HorizontalBarList rows={d.spend_by_department.map((x) => [x.department_name, toLakh(x.amount_paise)])} unit="lakh" /> : <Empty />}
         </div>
       </div>
 
       <div className="band">
         <div className="col" style={{ flex: "1 1 300px" }}>
-          <SectionTitle title="Policy violations" hint={`${d.violation_rate_pct}% of submitted lines`} />
-          <HorizontalBarList
-            rows={[["Over limit", d.flags.by_type.OVER_LIMIT], ["Weekend", d.flags.by_type.WEEKEND], ["Duplicate", d.flags.by_type.DUPLICATE], ["No receipt", d.flags.by_type.NO_RECEIPT]]}
-            color="#C26A00"
-            format={(v) => String(v)}
-            unit="flags"
-          />
+          <SectionTitle title="Policy violations" hint={`${(d.violations.violation_rate * 100).toFixed(1)}% of submitted lines`} />
+          {d.violations.by_rule.length ? (
+            <HorizontalBarList rows={d.violations.by_rule.map((r) => [ruleLabel(r.rule_code), r.count])} color="#C26A00" format={(v) => String(v)} unit="flags" />
+          ) : (
+            <Empty description="No violations" />
+          )}
         </div>
-        <div className="col" style={{ flex: "1 1 300px" }}>
-          <SectionTitle title="Queue health" hint="pending steps, oldest age" />
-          <HorizontalBarList rows={d.queue_health} format={(v) => String(v)} unit="pending" />
-        </div>
-        <div className="col" style={{ flex: "1.2 1 380px" }}>
-          <SectionTitle title="Longest waiting" hint="open claims" />
-          <div>
-            {d.longest_waiting.map((p) => (
-              <div key={p.claim_no} style={{ display: "grid", gridTemplateColumns: "minmax(120px,1fr) 110px 90px", gap: 12, alignItems: "center", padding: "12px 8px", borderBottom: "1px solid #EEF0F5", fontSize: 13 }}>
-                <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <span style={{ fontWeight: 600 }}>{p.claim_no}</span>
-                  <span style={{ fontSize: 12, color: "#5B6475" }}>{p.who}</span>
-                </span>
-                <span style={{ color: "#5B6475" }}>{p.with}</span>
-                <span>
-                  <StatusChip tone={p.days >= 6 ? "bad" : "warn"}>{p.days} days</StatusChip>
-                </span>
-              </div>
-            ))}
+        {queue.length ? (
+          <div className="col" style={{ flex: "1 1 300px" }}>
+            <SectionTitle title="Queue health" hint="pending steps, oldest age" />
+            <HorizontalBarList
+              rows={queue.map((q) => [`${ROLE_NAME[q.role] ?? q.role} (${Math.round((q.oldest_age_seconds ?? 0) / 86400)}d)`, q.pending])}
+              format={(v) => String(v)}
+              unit="pending"
+            />
           </div>
-        </div>
-      </div>
-
-      <div className="band">
-        <div className="col" style={{ flex: "1 1 300px" }}>
-          <SectionTitle title="Approval time" hint="days, chain-approved claims" />
-          <HorizontalBarList rows={[["Mean", d.approval_time.mean_days], ["Median", d.approval_time.median_days], ["p90", d.approval_time.p90_days]]} unit="days" />
-          <p style={{ fontSize: 12, color: "#5B6475" }}>Time spent in Sent back is not counted.</p>
-        </div>
-        <div className="col" style={{ flex: "1 1 300px" }}>
-          <SectionTitle title="Sample audit" hint="last 30 days, 10% draw" />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 12 }}>
-            {[
-              ["Sampled", d.sample_audit.sampled],
-              ["Passed", d.sample_audit.passed],
-              ["Failed", d.sample_audit.failed, "#A5271B"],
-              ["Pending", d.sample_audit.pending],
-            ].map(([l, v, c]) => (
-              <div key={l} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <span className="num" style={{ fontSize: 28, fontWeight: 700, color: c }}>
-                  {v}
-                </span>
-                <span style={{ fontSize: 12, color: "#5B6475" }}>{l}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        ) : null}
         <div className="col" style={{ flex: "1.2 1 380px" }}>
           <SectionTitle title="Violation rate by department" hint="top five, % of lines" />
-          <HorizontalBarList rows={d.violation_by_department} color="#C26A00" format={(v) => `${v.toFixed(1)}%`} />
+          {d.violations.top_departments.length ? (
+            <HorizontalBarList rows={d.violations.top_departments.map((x) => [x.department_name, x.rate * 100])} color="#C26A00" format={(v) => `${v.toFixed(1)}%`} />
+          ) : (
+            <Empty />
+          )}
         </div>
+      </div>
+
+      <div className="band">
+        <div className="col" style={{ flex: "1 1 300px" }}>
+          <SectionTitle title="Approval time" hint="chain-approved claims" />
+          <HorizontalBarList
+            rows={[
+              ["Mean", (at.mean_hours ?? 0) / 24],
+              ["Median", (at.median_hours ?? 0) / 24],
+              ["p90", (at.p90_hours ?? 0) / 24],
+            ]}
+            unit="days"
+          />
+          <p style={{ fontSize: 12, color: "#5B6475" }}>In days. Time spent in Sent back is not counted.</p>
+        </div>
+        {d.sample_audit ? (
+          <div className="col" style={{ flex: "1 1 300px" }}>
+            <SectionTitle title="Sample audit" hint={`this ${periodWord}`} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+              {[
+                ["Passed", d.sample_audit.passed],
+                ["Failed", d.sample_audit.failed, "#A5271B"],
+                ["Pending", d.sample_audit.pending],
+              ].map(([l, v, c]) => (
+                <div key={l} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <span className="num" style={{ fontSize: 28, fontWeight: 700, color: c }}>
+                    {v}
+                  </span>
+                  <span style={{ fontSize: 12, color: "#5B6475" }}>{l}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -271,7 +316,12 @@ function DashboardBody({ d, period, setPeriod }) {
 
 export default function DashboardPage() {
   const [period, setPeriod] = useState("MONTH");
-  const query = useQuery({ queryKey: ["dashboard", period], queryFn: () => getDashboardSummary(period) });
+  const range = periodRange(period);
+  const query = useQuery({ queryKey: ["dashboard", range], queryFn: () => getDashboardSummary(range) });
+  // A second, fixed six-month window feeds the monthly chart and the sparkline.
+  const trendRange = { from: ymd(dayjs().subtract(5, "month").startOf("month")), to: ymd(dayjs()) };
+  const trend = useQuery({ queryKey: ["dashboard", trendRange], queryFn: () => getDashboardSummary(trendRange) });
+
   return (
     <>
       <TopBar
@@ -282,12 +332,12 @@ export default function DashboardPage() {
         }
         right={
           <StatusChip tone="ok" icon={<CheckOutlined />}>
-            Audit trail verified
+            Live data
           </StatusChip>
         }
       />
       <LoadingOrError query={query} rows={16}>
-        {(d) => <DashboardBody d={d} period={period} setPeriod={setPeriod} />}
+        {(d) => <DashboardBody d={d} trend={trend.data} period={period} setPeriod={setPeriod} />}
       </LoadingOrError>
     </>
   );

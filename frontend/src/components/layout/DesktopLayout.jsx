@@ -1,15 +1,16 @@
 import { MenuOutlined } from "@ant-design/icons";
-import { Button, Drawer, Layout } from "antd";
+import { Button, Drawer, Layout, Spin } from "antd";
 import { useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
-import { ROLE_HOME, useRole } from "../../context/RoleContext";
+import { ROLE_HOME, useAuth } from "../../context/AuthContext";
 import { useIsDesktop } from "../../hooks/useIsDesktop";
 import { Sidebar } from "./Sidebar";
 
 /**
- * Sidebar shell: used by manager, auditor and finance head, and by employees on laptops.
- * Sends people without a role to sign-in, and people with another role to their own home.
+ * Sidebar shell: used by manager, auditor and finance head, and by everyone's "my claims" on laptops.
+ * Waits while the session loads, sends signed-out people to sign-in, and people with another
+ * role to their own home (the backend enforces permissions too; this is only navigation).
  * On small screens the sidebar becomes a slide-out drawer.
  */
 const COLLAPSED_KEY = "ef.sidebarCollapsed";
@@ -23,7 +24,7 @@ function readCollapsed() {
 }
 
 export function DesktopLayout({ allowedRoles }) {
-  const { role } = useRole();
+  const { status, role } = useAuth();
   const isDesktop = useIsDesktop();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(readCollapsed);
@@ -39,6 +40,7 @@ export function DesktopLayout({ allowedRoles }) {
     });
   };
 
+  if (status === "loading") return <Spin fullscreen />;
   if (!role) return <Navigate to="/" replace />;
   if (!allowedRoles.includes(role)) return <Navigate to={ROLE_HOME[role]} replace />;
 

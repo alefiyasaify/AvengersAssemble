@@ -10,7 +10,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import { ApiError } from "./api/httpClient";
-import { RoleProvider } from "./context/RoleContext";
+import { AuthProvider } from "./context/AuthContext";
 import "./styles/globalStyles.css";
 import { theme } from "./theme/antdTheme";
 
@@ -32,11 +32,11 @@ createRoot(document.getElementById("root")).render(
     <ConfigProvider theme={theme} locale={enGB}>
       <AntApp>
         <QueryClientProvider client={queryClient}>
-          <RoleProvider>
+          <AuthProvider>
             <BrowserRouter>
               <App />
             </BrowserRouter>
-          </RoleProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </AntApp>
     </ConfigProvider>

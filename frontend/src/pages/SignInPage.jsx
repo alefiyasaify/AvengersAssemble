@@ -1,19 +1,14 @@
-import { ArrowRightOutlined, CheckCircleFilled, CheckOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { ArrowRightOutlined, CheckOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
+import { Alert, Button, Form, Input } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { ApiError } from "../api/httpClient";
 import { BrandLogo } from "../components/common/BrandLogo";
 import { StatusChip } from "../components/common/StatusChip";
-import { InitialsAvatar } from "../components/common/InitialsAvatar";
-import { ROLE_HOME, useRole } from "../context/RoleContext";
+import { useAuth } from "../context/AuthContext";
 
-const ROLES = [
-  { id: "employee", name: "Employee", initials: "AM", who: "Aarav Mehta · Engineering", desc: "Raise claims and track their status" },
-  { id: "manager", name: "Line manager", initials: "PN", who: "Priya Nair · Engineering", desc: "First-level approvals and delegation" },
-  { id: "auditor", name: "Finance auditor", initials: "KS", who: "Karan Shah · Finance", desc: "Review queue, bulk approve, sample audit" },
-  { id: "head", name: "Finance head", initials: "MI", who: "Meera Iyer · Finance", desc: "High-value approvals, payouts, policy, audit" },
-];
+// The left panel's "policy check" card is an illustration of the product, not live data.
 
 function PolicyPreviewCard() {
   const rows = [
@@ -54,14 +49,23 @@ function PolicyPreviewCard() {
 }
 
 export default function SignInPage() {
-  const { role, setRole } = useRole();
-  const [selected, setSelected] = useState(role ?? "employee");
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const current = ROLES.find((r) => r.id === selected);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const onContinue = () => {
-    setRole(selected);
-    navigate(ROLE_HOME[selected]);
+  // POST /auth/login. The backend sets the HttpOnly session cookies; we only get MeRead back.
+  const onFinish = async ({ email, password }) => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const home = await login(email.trim(), password);
+      navigate(home, { replace: true });
+    } catch (err) {
+      setError(err instanceof ApiError && err.status !== 0 ? err.message : "Could not reach the server. Is the backend running on port 8000?");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -101,32 +105,30 @@ export default function SignInPage() {
             <h2 id="welcome" style={{ fontSize: 36, fontWeight: 700 }}>
               Welcome back
             </h2>
-            <p style={{ fontSize: 15, lineHeight: 1.5, color: "#5B6475" }}>Demo mode. Pick who you want to be and explore that role’s screens.</p>
+            <p style={{ fontSize: 15, lineHeight: 1.5, color: "#5B6475" }}>Sign in with your work email. You’ll land on the screens for your role.</p>
           </div>
 
-          <div role="group" aria-label="Choose a role" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
-            {ROLES.map((r) => {
-              const on = r.id === selected;
-              return (
-                <button key={r.id} type="button" className="role-card" aria-pressed={on} onClick={() => setSelected(r.id)} onDoubleClick={onContinue}>
-                  <span style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-                    <InitialsAvatar text={r.initials} size={48} filled={on} />
-                    {on ? <CheckCircleFilled style={{ color: "#2563EB", fontSize: 22 }} aria-label="Selected" /> : null}
-                  </span>
-                  <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    <span style={{ fontWeight: 700, fontSize: 16, color: "#0E1424" }}>{r.name}</span>
-                    <span style={{ fontSize: 12, color: "#5B6475" }}>{r.who}</span>
-                    <span style={{ fontSize: 12, lineHeight: 1.4, color: "#5B6475", marginTop: 4 }}>{r.desc}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {error ? <Alert type="error" showIcon title={error} /> : null}
 
-          <Button type="primary" size="large" block onClick={onContinue} style={{ height: 52, borderRadius: 14, fontWeight: 700, fontSize: 15 }}>
-            Continue as {current.name} <ArrowRightOutlined />
-          </Button>
-          <p style={{ fontSize: 13, color: "#5B6475", textAlign: "center" }}>You can switch role anytime from the avatar menu.</p>
+          <Form layout="vertical" requiredMark={false} onFinish={onFinish} disabled={submitting} size="large">
+            <Form.Item
+              label="Work email"
+              name="email"
+              rules={[
+                { required: true, message: "Enter your email." },
+                { type: "email", message: "Enter a valid email address." },
+              ]}
+            >
+              <Input prefix={<MailOutlined style={{ color: "#5B6475" }} />} autoComplete="username" placeholder="you@company.com" />
+            </Form.Item>
+            <Form.Item label="Password" name="password" rules={[{ required: true, message: "Enter your password." }]}>
+              <Input.Password prefix={<LockOutlined style={{ color: "#5B6475" }} />} autoComplete="current-password" />
+            </Form.Item>
+            <Button type="primary" htmlType="submit" block loading={submitting} style={{ height: 52, borderRadius: 14, fontWeight: 700, fontSize: 15 }}>
+              Sign in <ArrowRightOutlined />
+            </Button>
+          </Form>
+          <p style={{ fontSize: 13, color: "#5B6475", textAlign: "center" }}>After 5 wrong passwords the account is locked for a while.</p>
         </div>
       </section>
     </main>

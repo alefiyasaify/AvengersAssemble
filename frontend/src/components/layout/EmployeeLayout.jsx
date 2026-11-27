@@ -8,5 +8,5 @@ import { MobileLayout } from "./MobileLayout";
  */
 export function EmployeeLayout() {
   const isDesktop = useIsDesktop();
-  return isDesktop ? <DesktopLayout allowedRoles={["employee"]} /> : <MobileLayout />;
+  return isDesktop ? <DesktopLayout allowedRoles={["employee", "manager", "auditor", "head"]} /> : <MobileLayout />;
 }

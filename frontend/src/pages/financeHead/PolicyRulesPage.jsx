@@ -2,36 +2,87 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { App, Button, Modal, Table } from "antd";
 import { useState } from "react";
 
-import { getPolicyVersions, publishPolicyVersion } from "../../api/expenseApi";
-import { TopBar } from "../../components/layout/TopBar";
-import { StatusChip } from "../../components/common/StatusChip";
-import { PageHeader } from "../../components/common/PageHeader";
+import { getAppConfig, listApprovalLevels, listPolicyVersions, publishPolicyVersion } from "../../api/policyApi";
 import { LoadingOrError } from "../../components/common/LoadingOrError";
+import { PageHeader } from "../../components/common/PageHeader";
+import { StatusChip } from "../../components/common/StatusChip";
+import { TopBar } from "../../components/layout/TopBar";
+import { useCategories } from "../../hooks/useLookups";
 import { formatINR } from "../../utils/formatMoney";
-import { RULE_OUTCOME } from "../../utils/statusLabels";
+import { ROLE_NAME, formatDate } from "../../utils/statusLabels";
 
 const STATUS_LABEL = { ACTIVE: "Active", DRAFT: "Draft", RETIRED: "Retired" };
-const LEVEL_LABEL = { AUDITOR: "Auditor", FINANCE_HEAD: "Finance head" };
+const OUTCOME = { REJECT: { label: "Reject line", tone: "bad" }, ROUTE: { label: "Route", tone: "warn" }, FLAG: { label: "Flag", tone: "info" } };
+const TYPE_LABEL = {
+  daily_cap: "Daily cap",
+  per_unit_cap_by_tier: "Cap by city tier",
+  per_line_cap: "Per-line cap",
+  receipt_required_above: "Receipt threshold",
+  duplicate: "Duplicate match",
+  weekend_flag: "Weekend flag",
+  split_window: "Split window",
+  max_age_days: "Max age",
+};
+const WEEKDAY = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function PolicyBody({ versions }) {
+/** Human-readable limit from a rule's params (PolicyRuleConfig.params). */
+function limitText(rule) {
+  const p = rule.params ?? {};
+  switch (rule.type) {
+    case "daily_cap":
+      return `${formatINR(p.cap)} per employee per day`;
+    case "per_unit_cap_by_tier":
+      return Object.entries(p.cap_by_tier ?? {})
+        .map(([tier, cap]) => `${tier === "default" ? "Other cities" : `Tier ${tier}`} ${formatINR(cap)}`)
+        .join(", ")
+        .concat(p.unit ? ` per ${p.unit}` : "");
+    case "per_line_cap":
+      return `${formatINR(p.cap)} per line`;
+    case "receipt_required_above":
+      return `Receipt needed above ${formatINR(p.threshold)}`;
+    case "duplicate":
+      return "Same vendor, amount and date, or same receipt file";
+    case "weekend_flag":
+      return (p.weekend_days ?? []).map((d) => WEEKDAY[d]).join(" or ");
+    case "split_window":
+      return `Same vendor or category within ${p.window_days} days`;
+    case "max_age_days":
+      return `${p.max_age_days} days`;
+    default:
+      return JSON.stringify(p);
+  }
+}
+
+/** Rules whose settings differ between two versions, by code. */
+function diffRules(draft, active) {
+  if (!draft || !active) return [];
+  const before = Object.fromEntries(active.rules.map((r) => [r.code, r]));
+  return draft.rules
+    .filter((r) => JSON.stringify(r) !== JSON.stringify(before[r.code]))
+    .map((r) => ({ code: r.code, before: before[r.code] ? limitText(before[r.code]) : "New rule", after: limitText(r), activeChange: before[r.code] && before[r.code].active !== r.active }));
+}
+
+function PolicyBody({ versions, levels, config }) {
   const { message } = App.useApp();
   const queryClient = useQueryClient();
+  const categories = useCategories();
   const draft = versions.find((v) => v.status === "DRAFT");
   const active = versions.find((v) => v.status === "ACTIVE");
-  const [selectedId, setSelectedId] = useState((draft ?? active).id);
+  const [selectedId, setSelectedId] = useState((draft ?? active ?? versions[0])?.id);
   const [diffOpen, setDiffOpen] = useState(false);
-  const selected = versions.find((v) => v.id === selectedId) ?? active;
+  const selected = versions.find((v) => v.id === selectedId) ?? active ?? versions[0];
+  const changes = selected?.status === "DRAFT" ? diffRules(selected, active) : [];
 
   const publish = useMutation({
     mutationFn: () => publishPolicyVersion(draft.id),
     onSuccess: (v) => {
       queryClient.invalidateQueries({ queryKey: ["policy"] });
-      message.success(`Version ${v.version} is now active.`);
+      message.success(`Version ${v.version_no} is now active.`);
     },
     onError: (e) => message.error(e.message),
   });
 
-  const { levels, settings } = selected;
+  if (!selected) return <p className="ef-page">No policy versions exist yet.</p>;
 
   return (
     <div className="ef-page">
@@ -39,40 +90,49 @@ function PolicyBody({ versions }) {
         title="Policy rules"
         description="Limits are data, not code. Edit a draft version, then publish it. Claims already submitted keep the version they were checked under."
         extra={
-          <>
-            <Button onClick={() => message.info("Back-testing runs the draft over the last 3,000 claims (backend job).")}>Test against past claims</Button>
-            {draft ? (
-              <Button type="primary" loading={publish.isPending} onClick={() => Modal.confirm({ title: `Publish version ${draft.version}?`, content: "New claims will be checked against it. This is written to the audit trail.", okText: "Publish", onOk: () => publish.mutateAsync() })}>
-                Publish version {draft.version}
-              </Button>
-            ) : null}
-          </>
+          draft ? (
+            <Button
+              type="primary"
+              loading={publish.isPending}
+              onClick={() =>
+                Modal.confirm({
+                  title: `Publish version ${draft.version_no}?`,
+                  content: "New claims will be checked against it. This is written to the audit trail.",
+                  okText: "Publish",
+                  onOk: () => publish.mutateAsync(),
+                })
+              }
+            >
+              Publish version {draft.version_no}
+            </Button>
+          ) : null
         }
       />
 
       <div role="group" aria-label="Policy versions" style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
         {[...versions]
-          .sort((a, b) => b.version - a.version)
+          .sort((a, b) => b.version_no - a.version_no)
           .map((v) => (
-            <Button key={v.id} className="filter-pill" type={v.id === selectedId ? "primary" : "default"} aria-pressed={v.id === selectedId} onClick={() => setSelectedId(v.id)}>
-              Version {v.version} · {STATUS_LABEL[v.status]}
+            <Button key={v.id} className="filter-pill" type={v.id === selected.id ? "primary" : "default"} aria-pressed={v.id === selected.id} onClick={() => setSelectedId(v.id)}>
+              Version {v.version_no} · {STATUS_LABEL[v.status]}
             </Button>
           ))}
-        {active ? (
+        {active?.published_at ? (
           <span style={{ fontSize: 13, color: "#5B6475", marginLeft: 8 }}>
-            Version {active.version} published by {active.published_by} on{" "}
-            {new Date(active.published_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+            Version {active.version_no} published {formatDate(active.published_at)}
           </span>
         ) : null}
       </div>
 
-      {selected.status === "DRAFT" && selected.changes.length ? (
+      {selected.notes ? <p style={{ color: "#3F4859" }}>{selected.notes}</p> : null}
+
+      {changes.length ? (
         <div className="banner banner-warn">
           <span>
             <strong>
-              {selected.changes.length} change{selected.changes.length > 1 ? "s" : ""} in this draft.
+              {changes.length} change{changes.length > 1 ? "s" : ""} in this draft.
             </strong>{" "}
-            {selected.changes.map((c) => `${c.field}: ${formatINR(c.before_paise)} to ${formatINR(c.after_paise)}`).join("; ")}. Publishing is written to the audit trail with this before and after.
+            {changes.map((c) => c.code).join(", ")}. Publishing is written to the audit trail with the before and after.
           </span>
           <Button type="link" style={{ color: "#6B3A00", fontWeight: 600, padding: 0 }} onClick={() => setDiffOpen(true)}>
             View full diff
@@ -87,7 +147,7 @@ function PolicyBody({ versions }) {
             dataSource={selected.rules}
             pagination={false}
             scroll={{ x: 760 }}
-            onRow={(r) => ({ style: r.changed ? { background: "#FFF8E8" } : undefined })}
+            onRow={(r) => ({ style: changes.some((c) => c.code === r.code) ? { background: "#FFF8E8" } : undefined })}
             columns={[
               {
                 title: "Rule",
@@ -97,82 +157,80 @@ function PolicyBody({ versions }) {
                     <span className="mono" style={{ fontWeight: 600 }}>
                       {c}
                     </span>
-                    <span style={{ fontSize: 12, color: "#5B6475" }}>{r.type}</span>
+                    <span style={{ fontSize: 12, color: "#5B6475" }}>{TYPE_LABEL[r.type] ?? r.type}</span>
                   </span>
                 ),
               },
-              { title: "Applies to", dataIndex: "applies_to" },
-              { title: "Limit", dataIndex: "limit_text", className: "num" },
-              { title: "If breached", dataIndex: "outcome", render: (o) => <StatusChip tone={RULE_OUTCOME[o].tone}>{RULE_OUTCOME[o].label}</StatusChip> },
-              { title: "Forces level", dataIndex: "forces_level", render: (l) => <span style={{ color: "#5B6475" }}>{LEVEL_LABEL[l] ?? "None"}</span> },
-              { title: "Active", dataIndex: "active", render: (a) => <StatusChip tone={a ? "ok" : "neutral"}>{a ? "On" : "Off"}</StatusChip> },
+              { title: "Applies to", dataIndex: "category", render: (c) => (c ? categories.byCode[c] ?? c : "All categories") },
+              { title: "Limit", key: "limit", className: "num", render: (_, r) => limitText(r) },
+              { title: "If breached", dataIndex: "outcome", render: (o) => <StatusChip tone={OUTCOME[o].tone}>{OUTCOME[o].label}</StatusChip> },
+              { title: "Forces level", dataIndex: "force_level", render: (l) => <span style={{ color: "#5B6475" }}>{l ? ROLE_NAME[levels.find((x) => x.level_no === l)?.role] ?? `Level ${l}` : "None"}</span> },
+              { title: "Active", dataIndex: "active", render: (a) => <StatusChip tone={a !== false ? "ok" : "neutral"}>{a !== false ? "On" : "Off"}</StatusChip> },
             ]}
           />
         </div>
         <div style={{ flex: "1 1 320px", minWidth: 0, display: "flex", flexDirection: "column", gap: 28 }}>
           <section>
             <b style={{ fontSize: 15, display: "block", paddingBottom: 6 }}>Approval levels</b>
-            <div className="kv">
-              <span>1 · Manager</span>
-              <span style={{ fontWeight: 600 }}>Always</span>
-            </div>
-            <div className="kv">
-              <span>2 · Finance auditor</span>
-              <span className="num" style={{ fontWeight: 600 }}>
-                Payable above {formatINR(levels.auditor_above_paise)}
-              </span>
-            </div>
-            <div className="kv">
-              <span>3 · Finance head</span>
-              <span className="num" style={{ fontWeight: 600 }}>
-                Payable above {formatINR(levels.finance_head_above_paise)}
-              </span>
-            </div>
-            <p style={{ fontSize: 12, color: "#5B6475", lineHeight: 1.5 }}>“Above” means exactly {formatINR(levels.auditor_above_paise)} stays with the manager. Levels are fixed on a claim when it is submitted.</p>
+            {[...levels]
+              .sort((a, b) => a.level_no - b.level_no)
+              .map((l) => (
+                <div key={l.level_no} className="kv">
+                  <span>
+                    {l.level_no} · {ROLE_NAME[l.role]}
+                    {l.active === false ? " (off)" : ""}
+                  </span>
+                  <span className="num" style={{ fontWeight: 600 }}>
+                    {l.min_amount_paise_exclusive ? `Payable above ${formatINR(l.min_amount_paise_exclusive)}` : "Always"}
+                  </span>
+                </div>
+              ))}
+            <p style={{ fontSize: 12, color: "#5B6475", lineHeight: 1.5 }}>“Above” means strictly greater. Levels are fixed on a claim when it is submitted.</p>
           </section>
           <section>
             <b style={{ fontSize: 15, display: "block", paddingBottom: 6 }}>Settings</b>
             <div className="kv">
               <span>Auto-approve up to</span>
               <span className="num" style={{ fontWeight: 600 }}>
-                {formatINR(levels.auto_approve_up_to_paise)} payable
+                {formatINR(config.auto_approve_max_total_paise)} payable
               </span>
             </div>
             <div className="kv">
               <span>Sample audit rate</span>
               <span className="num" style={{ fontWeight: 600 }}>
-                {Math.round(settings.sample_audit_rate * 100)}%
+                {Math.round(config.sample_audit_rate * 100)}%
               </span>
             </div>
             <div className="kv">
               <span>Delegation limit</span>
               <span className="num" style={{ fontWeight: 600 }}>
-                {settings.delegation_limit_days} days
+                {config.delegation_max_days} days
+              </span>
+            </div>
+            <div className="kv">
+              <span>IMPS limit per payment</span>
+              <span className="num" style={{ fontWeight: 600 }}>
+                {formatINR(config.imps_max_paise)}
               </span>
             </div>
             <div className="kv">
               <span>Timezone</span>
-              <span style={{ fontWeight: 600 }}>{settings.timezone}</span>
+              <span style={{ fontWeight: 600 }}>{config.timezone}</span>
             </div>
-          </section>
-          <section style={{ background: "#F7F8FA", borderRadius: 12, padding: 16, display: "flex", flexDirection: "column", gap: 6 }}>
-            <b style={{ fontSize: 14 }}>Test against past claims</b>
-            <p style={{ fontSize: 13, lineHeight: 1.5, color: "#3F4859" }}>Run the draft over the last 3,000 claims to see how many would change outcome before you publish.</p>
           </section>
         </div>
       </div>
 
-      <Modal open={diffOpen} onCancel={() => setDiffOpen(false)} footer={null} title={`Version ${selected.version} vs version ${active?.version}`}>
+      <Modal open={diffOpen} onCancel={() => setDiffOpen(false)} footer={null} width={720} title={`Version ${selected.version_no} vs version ${active?.version_no}`}>
         <Table
-          rowKey="rule"
+          rowKey="code"
           size="small"
           pagination={false}
-          dataSource={selected.changes}
+          dataSource={changes}
           columns={[
-            { title: "Rule", dataIndex: "rule", render: (r) => <span className="mono">{r}</span> },
-            { title: "Field", dataIndex: "field" },
-            { title: "Before", dataIndex: "before_paise", render: formatINR },
-            { title: "After", dataIndex: "after_paise", render: (v) => <strong>{formatINR(v)}</strong> },
+            { title: "Rule", dataIndex: "code", render: (r) => <span className="mono">{r}</span> },
+            { title: "Before", dataIndex: "before" },
+            { title: "After", dataIndex: "after", render: (v, r) => <strong>{v}{r.activeChange ? " (on/off changed)" : ""}</strong> },
           ]}
         />
       </Modal>
@@ -181,17 +239,27 @@ function PolicyBody({ versions }) {
 }
 
 export default function PolicyRulesPage() {
-  const query = useQuery({ queryKey: ["policy", "versions"], queryFn: getPolicyVersions });
+  const versions = useQuery({ queryKey: ["policy", "versions"], queryFn: listPolicyVersions });
+  const levels = useQuery({ queryKey: ["policy", "levels"], queryFn: listApprovalLevels });
+  const config = useQuery({ queryKey: ["policy", "config"], queryFn: getAppConfig });
+  // Wait for all three; show the first error if any fails.
+  const combined = {
+    isPending: versions.isPending || levels.isPending || config.isPending,
+    isError: versions.isError || levels.isError || config.isError,
+    error: versions.error ?? levels.error ?? config.error,
+    refetch: () => Promise.all([versions.refetch(), levels.refetch(), config.refetch()]),
+    data: { versions: versions.data, levels: levels.data, config: config.data },
+  };
   return (
     <>
       <TopBar
         left={
           <span>
-            Admin <span aria-hidden="true">/</span> <span style={{ color: "#0E1424", fontWeight: 600 }}>Policy rules</span>
+            Admin <span aria-hidden="true">/</span> <span style={{ color: "#0E1424", fontWeight: 700 }}>Policy rules</span>
           </span>
         }
       />
-      <LoadingOrError query={query}>{(d) => <PolicyBody versions={d.items} />}</LoadingOrError>
+      <LoadingOrError query={combined}>{(d) => <PolicyBody versions={d.versions} levels={d.levels} config={d.config} />}</LoadingOrError>
     </>
   );
 }

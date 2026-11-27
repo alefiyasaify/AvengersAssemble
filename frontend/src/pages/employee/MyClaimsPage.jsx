@@ -2,28 +2,53 @@ import { BellOutlined, LogoutOutlined, PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Badge, Button, Dropdown, Empty } from "antd";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { listMyClaims } from "../../api/expenseApi";
+import { listClaims } from "../../api/claimsApi";
 import { InitialsAvatar } from "../../components/common/InitialsAvatar";
 import { LoadingOrError } from "../../components/common/LoadingOrError";
 import { PageHeader } from "../../components/common/PageHeader";
 import { StatusChip } from "../../components/common/StatusChip";
 import { TopBar } from "../../components/layout/TopBar";
-import { useRole } from "../../context/RoleContext";
+import { useAuth } from "../../context/AuthContext";
 import { useIsDesktop } from "../../hooks/useIsDesktop";
 import { formatINR } from "../../utils/formatMoney";
-import { claimStatus } from "../../utils/statusLabels";
+import { ROLE_NAME, claimStatus, formatDate, isPending, ruleLabel } from "../../utils/statusLabels";
 
 const FILTERS = [
   { key: "ALL", label: "All" },
   { key: "DRAFT", label: "Draft" },
+  { key: "PENDING", label: "In review" },
   { key: "SENT_BACK", label: "Sent back" },
   { key: "PAID", label: "Paid" },
 ];
 
+const matchesFilter = (claim, filter) =>
+  filter === "ALL" ? true : filter === "PENDING" ? isPending(claim.status) : claim.status === filter;
+
+/** Progress dots for levels 1..3 from ClaimSummary.status and current_level. */
+function stepStates(claim) {
+  const levels = [1, 2, 3];
+  if (claim.status === "APPROVED" || claim.status === "PAID") return levels.map(() => "DONE");
+  if (claim.status === "SENT_BACK") return ["HOLD", "WAITING", "WAITING"];
+  if (!isPending(claim.status)) return levels.map(() => "WAITING");
+  const current = claim.current_level ?? 1;
+  return levels.map((n) => (n < current ? "DONE" : n === current ? "CURRENT" : "WAITING"));
+}
+
+function stepLabel(claim) {
+  if (claim.status === "DRAFT") return `${claim.line_count} line${claim.line_count === 1 ? "" : "s"} · not submitted`;
+  if (claim.status === "SENT_BACK") return "Needs your changes";
+  if (claim.status === "PAID") return `Paid${claim.decided_at ? ` · approved ${formatDate(claim.decided_at)}` : ""}`;
+  if (isPending(claim.status) && claim.current_step) {
+    const who = claim.current_step.assigned_to_name ?? ROLE_NAME[claim.current_step.role];
+    return `With ${who}`;
+  }
+  return claimStatus(claim.status).label;
+}
+
 /** The 3-step approval progress on each claim card (manager → auditor → finance head). */
-function StepDots({ steps, label }) {
+function StepDots({ claim }) {
   const style = (state) => {
     switch (state) {
       case "DONE":
@@ -36,6 +61,7 @@ function StepDots({ steps, label }) {
         return { background: "#ECEFF5", color: "#4A5366" };
     }
   };
+  const steps = stepStates(claim);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
       {steps.map((s, i) => (
@@ -46,34 +72,38 @@ function StepDots({ steps, label }) {
           {i < steps.length - 1 ? <span className="step-line" style={{ background: s === "DONE" ? "#2563EB" : "#DCE1EE" }} /> : null}
         </span>
       ))}
-      <span style={{ flex: 1, textAlign: "right", fontSize: 12, color: "#5B6475" }}>{label}</span>
+      <span style={{ flex: 1, textAlign: "right", fontSize: 12, color: "#5B6475" }}>{stepLabel(claim)}</span>
     </div>
   );
 }
 
 function ClaimCard({ claim }) {
   const st = claimStatus(claim.status);
+  const date = claim.submitted_at ?? claim.created_at;
   return (
-    <article className="mobile-card claim-card">
+    <Link to={`/employee/claims/${claim.id}`} className="mobile-card claim-card" style={{ color: "inherit", textDecoration: "none" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
           <span style={{ fontWeight: 700, fontSize: 16 }}>{claim.title}</span>
           <span style={{ fontSize: 12, color: "#5B6475" }}>
-            {claim.claim_no ?? "Draft"} · {claim.date_label}
+            {claim.claim_no} · {formatDate(date)}
           </span>
         </div>
         <span className="num" style={{ fontWeight: 800, fontSize: 17, whiteSpace: "nowrap" }}>
-          {formatINR(claim.total_paise)}
+          {formatINR(claim.status === "DRAFT" ? claim.total_paise : claim.payable_paise)}
         </span>
       </div>
-      <StepDots steps={claim.steps} label={claim.step_label} />
-      <div>
+      <StepDots claim={claim} />
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <StatusChip tone={st.tone}>{st.label}</StatusChip>
+        {claim.sample_audit_pending ? <StatusChip tone="info">Sample audit</StatusChip> : null}
+        {claim.finding_codes.slice(0, 2).map((code) => (
+          <StatusChip key={code} tone="warn">
+            {ruleLabel(code)}
+          </StatusChip>
+        ))}
       </div>
-      {claim.note ? (
-        <div style={{ background: "#FFF3D6", borderRadius: 14, padding: "10px 12px", fontSize: 13, lineHeight: 1.4, color: "#6B3A00" }}>{claim.note}</div>
-      ) : null}
-    </article>
+    </Link>
   );
 }
 
@@ -82,7 +112,7 @@ function FilterPills({ filter, setFilter, counts, dark }) {
     <div role="group" aria-label="Filter claims" style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
       {FILTERS.map((f) => {
         const on = f.key === filter;
-        const n = f.key !== "ALL" && f.key !== "PAID" ? counts[f.key] : null;
+        const n = f.key !== "ALL" ? counts[f.key] : null;
         return (
           <Button
             key={f.key}
@@ -108,27 +138,49 @@ function FilterPills({ filter, setFilter, counts, dark }) {
   );
 }
 
+function summarise(items) {
+  const pending = items.filter((c) => isPending(c.status));
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const paidThisMonth = items
+    .filter((c) => c.status === "PAID" && c.decided_at && new Date(c.decided_at) >= monthStart)
+    .reduce((s, c) => s + c.payable_paise, 0);
+  return {
+    inReview: pending.reduce((s, c) => s + c.payable_paise, 0),
+    openCount: pending.length,
+    paidThisMonth,
+    counts: {
+      DRAFT: items.filter((c) => c.status === "DRAFT").length,
+      PENDING: pending.length,
+      SENT_BACK: items.filter((c) => c.status === "SENT_BACK").length,
+      PAID: items.filter((c) => c.status === "PAID").length,
+    },
+  };
+}
+
 function SummaryHero({ summary }) {
   return (
     <section className="hero" style={{ borderRadius: 28, padding: 22, gap: 16, boxShadow: "0 18px 36px rgba(31,79,216,.35)" }} aria-label="Claims summary">
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <span className="label">In review</span>
-        <span className="big num">{formatINR(summary.in_review_paise)}</span>
+        <span className="big num">{formatINR(summary.inReview)}</span>
       </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <span className="pill">{summary.open_count} open claims</span>
-        <span className="pill">{formatINR(summary.paid_this_month_paise)} paid this month</span>
+        <span className="pill">{summary.openCount} open claims</span>
+        <span className="pill">{formatINR(summary.paidThisMonth)} approved and paid this month</span>
       </div>
     </section>
   );
 }
 
 export default function MyClaimsPage() {
-  const { user, setRole } = useRole();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const isDesktop = useIsDesktop();
   const [filter, setFilter] = useState("ALL");
-  const query = useQuery({ queryKey: ["claims", "mine"], queryFn: () => listMyClaims() });
+  // GET /claims?scope=mine (first 100; enough for one person's claims list)
+  const query = useQuery({ queryKey: ["claims", "mine"], queryFn: () => listClaims({ scope: "mine" }) });
 
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
   const firstName = user.name.split(" ")[0];
@@ -136,18 +188,18 @@ export default function MyClaimsPage() {
   const content = (
     <LoadingOrError query={query} rows={8}>
       {(data) => {
-        const counts = data.items.reduce((acc, c) => ({ ...acc, [c.status]: (acc[c.status] ?? 0) + 1 }), {});
-        const items = filter === "ALL" ? data.items : data.items.filter((c) => c.status === filter);
+        const summary = summarise(data.items);
+        const items = data.items.filter((c) => matchesFilter(c, filter));
         return (
           <>
             <div className="claims-summary-row">
-              <SummaryHero summary={data.summary} />
+              <SummaryHero summary={summary} />
               {isDesktop ? (
                 <div className="claims-stats">
                   {[
-                    ["Open claims", data.summary.open_count],
-                    ["Drafts", counts.DRAFT ?? 0],
-                    ["Need your reply", counts.SENT_BACK ?? 0],
+                    ["Open claims", summary.openCount],
+                    ["Drafts", summary.counts.DRAFT],
+                    ["Need your changes", summary.counts.SENT_BACK],
                   ].map(([label, value]) => (
                     <div key={label} className="stat-tile">
                       <span className="num" style={{ fontSize: 32, fontWeight: 800, lineHeight: 1 }}>
@@ -160,10 +212,18 @@ export default function MyClaimsPage() {
               ) : null}
             </div>
 
-            <FilterPills filter={filter} setFilter={setFilter} counts={counts} dark={!isDesktop} />
+            <FilterPills filter={filter} setFilter={setFilter} counts={summary.counts} dark={!isDesktop} />
 
             <section aria-label="Claims" className="claims-grid">
-              {items.length === 0 ? <Empty description="No claims here yet" /> : null}
+              {items.length === 0 ? (
+                <Empty description={data.items.length ? "No claims match this filter" : "You have no claims yet"}>
+                  {data.items.length ? null : (
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/employee/claims/new")}>
+                      Start a claim
+                    </Button>
+                  )}
+                </Empty>
+              ) : null}
               {items.map((c) => (
                 <ClaimCard key={c.id} claim={c} />
               ))}
@@ -202,9 +262,13 @@ export default function MyClaimsPage() {
           <Dropdown
             trigger={["click"]}
             menu={{
-              items: [{ key: "out", icon: <LogoutOutlined />, label: "Switch role" }],
-              onClick: () => {
-                setRole(null);
+              items: [
+                { key: "who", label: user.email, disabled: true },
+                { key: "out", icon: <LogoutOutlined />, label: "Sign out", danger: true },
+              ],
+              onClick: async ({ key }) => {
+                if (key !== "out") return;
+                await logout();
                 navigate("/");
               },
             }}
@@ -219,7 +283,7 @@ export default function MyClaimsPage() {
           </div>
         </div>
         <Badge dot color="#E0551B" offset={[-12, 12]}>
-          <Button className="round-btn" icon={<BellOutlined />} aria-label="Notifications, 2 unread" />
+          <Button className="round-btn" icon={<BellOutlined />} aria-label="Notifications" />
         </Badge>
       </header>
       {content}
