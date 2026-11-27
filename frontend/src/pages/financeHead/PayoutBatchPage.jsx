@@ -1,6 +1,6 @@
-import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { App, Button, Empty, Popconfirm, Skeleton, Steps, Table } from "antd";
+import { App, Button, Empty, Input, Popconfirm, Skeleton, Steps, Table } from "antd";
 import { useState } from "react";
 
 import * as payoutsApi from "../../api/payoutsApi";
@@ -103,18 +103,6 @@ function BatchPanel({ batchId }) {
         <p style={{ fontSize: 12, lineHeight: 1.5, color: "#5B6475" }}>Export freezes the batch. Marking as paid moves every claim in it to Paid, can’t be undone and is written to the audit trail.</p>
       </div>
 
-      <Table
-        rowKey="claim_id"
-        size="small"
-        dataSource={batch.items}
-        pagination={false}
-        columns={[
-          { title: "Employee", dataIndex: "employee_name" },
-          { title: "Account", dataIndex: "account_last4", render: (v) => <span className="mono">••••{v}</span> },
-          { title: "Amount", dataIndex: "amount_paise", align: "right", render: (v) => <span className="num">{formatINR(v)}</span> },
-        ]}
-      />
-
       {hasFile ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
@@ -166,10 +154,20 @@ function EligibleClaims({ onCreated }) {
               <Table
                 rowKey="claim_id"
                 dataSource={items}
-                pagination={false}
+                pagination={{ pageSize: 10, showSizeChanger: true, pageSizeOptions: [10, 25, 50, 100], showTotal: (total, [from, to]) => `${from}–${to} of ${total} claims` }}
                 scroll={{ x: 560 }}
                 locale={{ emptyText: <Empty description="No approved claims are waiting for payout." /> }}
-                rowSelection={{ selectedRowKeys: selected, onChange: setSelected, getCheckboxProps: (r) => ({ "aria-label": `Select ${r.claim_no}` }) }}
+                rowSelection={{
+                  selectedRowKeys: selected,
+                  onChange: setSelected,
+                  preserveSelectedRowKeys: true,
+                  selections: [
+                    { key: "all", text: `Select all ${items.length} claims`, onSelect: () => setSelected(items.map((c) => c.claim_id)) },
+                    Table.SELECTION_INVERT,
+                    Table.SELECTION_NONE,
+                  ],
+                  getCheckboxProps: (r) => ({ "aria-label": `Select ${r.claim_no}` }),
+                }}
                 columns={[
                   { title: "Claim", dataIndex: "claim_no", render: (v) => <span style={{ fontWeight: 600 }}>{v}</span> },
                   { title: "Employee", dataIndex: "owner_name" },
@@ -224,49 +222,122 @@ export default function PayoutBatchPage() {
             items={[{ title: "Create" }, { title: "Verify", description: "Finance auditor" }, { title: "Export" }, { title: "Mark as paid" }]}
           />
         ) : null}
+        {/* 1. Eligible claims (head only) with the selected batch's summary and actions beside it. */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 40, alignItems: "flex-start" }}>
-          <div style={{ flex: "1.5 1 520px", minWidth: 0, display: "flex", flexDirection: "column", gap: 32 }}>
-            {role === "head" ? <EligibleClaims onCreated={setSelectedId} /> : null}
-            <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <b style={{ fontSize: 15 }}>Batches</b>
-              <LoadingOrError query={batches}>
-                {() => (
-                  <Table
-                    rowKey="id"
-                    dataSource={items}
-                    pagination={false}
-                    scroll={{ x: 560 }}
-                    locale={{ emptyText: "No batches yet." }}
-                    onRow={(b) => ({
-                      onClick: () => setSelectedId(b.id),
-                      onKeyDown: (e) => e.key === "Enter" && setSelectedId(b.id),
-                      tabIndex: 0,
-                      style: { cursor: "pointer", background: b.id === active ? "#F3F7FF" : undefined },
-                    })}
-                    columns={[
-                      { title: "Batch", dataIndex: "batch_no", render: (v) => <span style={{ fontWeight: 600 }}>{v}</span> },
-                      { title: "Created", dataIndex: "created_at", render: (v) => <span style={{ color: "#5B6475" }}>{formatDate(v)}</span> },
-                      { title: "Claims", dataIndex: "claim_count" },
-                      {
-                        title: "Total",
-                        dataIndex: "total_paise",
-                        align: "right",
-                        render: (v) => (
-                          <span className="num" style={{ fontWeight: 700 }}>
-                            {formatINR(v)}
-                          </span>
-                        ),
-                      },
-                      { title: "Status", dataIndex: "status", render: (s) => <StatusChip tone={BATCH_STATUS[s].tone}>{BATCH_STATUS[s].label}</StatusChip> },
-                    ]}
-                  />
-                )}
-              </LoadingOrError>
-            </section>
-          </div>
+          {role === "head" ? (
+            <div style={{ flex: "1.5 1 520px", minWidth: 0 }}>
+              <EligibleClaims onCreated={setSelectedId} />
+            </div>
+          ) : null}
           {active ? <BatchPanel key={active} batchId={active} /> : null}
         </div>
+
+        {/* 2. All batches, full width. */}
+        <section style={{ display: "flex", flexDirection: "column", gap: 10 }} aria-label="Batches">
+          <div className="section-title">
+            <b>Batches</b>
+            <span>Select a batch to see its payments and next step</span>
+          </div>
+          <LoadingOrError query={batches}>
+            {() => (
+              <Table
+                rowKey="id"
+                dataSource={items}
+                pagination={{ pageSize: 8, showSizeChanger: false, hideOnSinglePage: true, showTotal: (total, [from, to]) => `${from}–${to} of ${total} batches` }}
+                scroll={{ x: 900 }}
+                locale={{ emptyText: "No batches yet." }}
+                onRow={(b) => ({
+                  onClick: () => setSelectedId(b.id),
+                  onKeyDown: (e) => e.key === "Enter" && setSelectedId(b.id),
+                  tabIndex: 0,
+                  "aria-selected": b.id === active,
+                  style: { cursor: "pointer", background: b.id === active ? "#F3F7FF" : undefined },
+                })}
+                columns={[
+                  { title: "Batch", dataIndex: "batch_no", render: (v) => <span style={{ fontWeight: 600 }}>{v}</span> },
+                  { title: "Status", dataIndex: "status", render: (s) => <StatusChip tone={BATCH_STATUS[s].tone}>{BATCH_STATUS[s].label}</StatusChip> },
+                  { title: "Claims", dataIndex: "claim_count", align: "right" },
+                  {
+                    title: "Total",
+                    dataIndex: "total_paise",
+                    align: "right",
+                    sorter: (a, b) => a.total_paise - b.total_paise,
+                    render: (v) => (
+                      <span className="num" style={{ fontWeight: 700 }}>
+                        {formatINR(v)}
+                      </span>
+                    ),
+                  },
+                  { title: "Created", dataIndex: "created_at", sorter: (a, b) => a.created_at.localeCompare(b.created_at), render: (v) => <span style={{ color: "#5B6475" }}>{formatDate(v)}</span> },
+                  { title: "Verified", dataIndex: "verified_at", render: (v) => (v ? formatDate(v) : <span style={{ color: "#9AA3B5" }}>–</span>) },
+                  { title: "Exported", dataIndex: "exported_at", render: (v) => (v ? formatDate(v) : <span style={{ color: "#9AA3B5" }}>–</span>) },
+                  { title: "Paid", dataIndex: "paid_at", render: (v) => (v ? formatDate(v) : <span style={{ color: "#9AA3B5" }}>–</span>) },
+                ]}
+              />
+            )}
+          </LoadingOrError>
+        </section>
+
+        {/* 3. Payments in the selected batch, full width. */}
+        {active ? <BatchItems key={`items-${active}`} batchId={active} /> : null}
       </div>
     </>
+  );
+}
+
+/** Full-width list of the payments in the selected batch (can be hundreds of rows). */
+function BatchItems({ batchId }) {
+  const [q, setQ] = useState("");
+  const query = useQuery({ queryKey: ["payouts", "batch", batchId], queryFn: () => payoutsApi.getBatch(batchId) });
+
+  return (
+    <section style={{ display: "flex", flexDirection: "column", gap: 12 }} aria-label="Payments in this batch">
+      <LoadingOrError query={query} rows={6}>
+        {(batch) => {
+          const needle = q.trim().toLowerCase();
+          const rows = needle
+            ? batch.items.filter((i) => i.employee_name.toLowerCase().includes(needle) || i.bank_ref.toLowerCase().includes(needle) || i.account_last4.includes(needle))
+            : batch.items;
+          return (
+            <>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+                <div className="section-title" style={{ flex: "1 1 auto" }}>
+                  <b>Payments in {batch.batch_no}</b>
+                  <span>
+                    {batch.claim_count} claims · {formatINR(batch.total_paise)}
+                  </span>
+                </div>
+                <Input prefix={<SearchOutlined />} placeholder="Search employee, account or reference" aria-label="Search payments" allowClear value={q} onChange={(e) => setQ(e.target.value)} style={{ maxWidth: 320 }} />
+              </div>
+              <Table
+                rowKey="claim_id"
+                size="middle"
+                dataSource={rows}
+                pagination={rows.length > 15 ? { pageSize: 15, showSizeChanger: false, showTotal: (total, [from, to]) => `${from}–${to} of ${total}` } : false}
+                scroll={{ x: 640 }}
+                locale={{ emptyText: q ? "No payment matches that search" : "This batch has no claims" }}
+                columns={[
+                  { title: "#", dataIndex: "seq", width: 64, sorter: (a, b) => a.seq - b.seq, defaultSortOrder: "ascend" },
+                  { title: "Employee", dataIndex: "employee_name", sorter: (a, b) => a.employee_name.localeCompare(b.employee_name) },
+                  { title: "Account", dataIndex: "account_last4", render: (v) => <span className="mono">••••{v}</span> },
+                  { title: "Bank reference", dataIndex: "bank_ref", render: (v) => <span className="mono">{v}</span> },
+                  {
+                    title: "Amount",
+                    dataIndex: "amount_paise",
+                    align: "right",
+                    sorter: (a, b) => a.amount_paise - b.amount_paise,
+                    render: (v) => (
+                      <span className="num" style={{ fontWeight: 700 }}>
+                        {formatINR(v)}
+                      </span>
+                    ),
+                  },
+                ]}
+              />
+            </>
+          );
+        }}
+      </LoadingOrError>
+    </section>
   );
 }

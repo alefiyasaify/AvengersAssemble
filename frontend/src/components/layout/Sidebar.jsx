@@ -1,11 +1,10 @@
-import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Dropdown, Input, Tooltip } from "antd";
+import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Tooltip } from "antd";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import { BrandLogo } from "../common/BrandLogo";
 import { InitialsAvatar } from "../common/InitialsAvatar";
-import { KeyboardKey } from "../common/KeyboardKey";
 import { MY_EXPENSE_LINKS, SIDEBAR_LINKS } from "./sidebarLinks";
 
 function NavGroup({ title, links, collapsed, onNavigate }) {
@@ -36,7 +35,7 @@ function NavGroup({ title, links, collapsed, onNavigate }) {
 }
 
 /**
- * Left navigation: logo, search, the role's links, and the signed-in user card (sign out).
+ * Left navigation: logo, the role's links, and the signed-in user card (sign out).
  * collapsed = slim icon-only rail (labels move into tooltips).
  * onToggleCollapse is only passed on desktop; the mobile drawer has no collapse button.
  */
@@ -79,20 +78,6 @@ export function Sidebar({ collapsed = false, onToggleCollapse, onNavigate }) {
         {collapsed ? null : collapseButton}
       </div>
       {collapsed ? <div style={{ display: "flex", justifyContent: "center" }}>{collapseButton}</div> : null}
-
-      {collapsed ? (
-        <Tooltip title="Search (Ctrl K)" placement="right">
-          <Button icon={<SearchOutlined />} aria-label="Search" style={{ alignSelf: "center", borderRadius: 14 }} />
-        </Tooltip>
-      ) : (
-        <Input
-          prefix={<SearchOutlined style={{ color: "#5B6475" }} />}
-          suffix={<KeyboardKey>Ctrl K</KeyboardKey>}
-          placeholder="Search"
-          aria-label="Search"
-          style={{ borderRadius: 14, borderColor: "#DDE2EE" }}
-        />
-      )}
 
       <nav aria-label="Main" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <NavGroup title="WORKSPACE" links={SIDEBAR_LINKS[role] ?? []} collapsed={collapsed} onNavigate={onNavigate} />

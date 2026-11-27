@@ -11,6 +11,7 @@ import {
   SlidersOutlined,
   SwapOutlined,
   UnorderedListOutlined,
+  UserAddOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
 
@@ -33,6 +34,7 @@ export const SIDEBAR_LINKS = {
     { to: "/auditor/sample", label: "Sample audit", icon: AuditOutlined },
     { to: "/auditor/duplicates", label: "Duplicates", icon: CopyOutlined },
     { to: "/auditor/payouts", label: "Payout batches", icon: WalletOutlined },
+    { to: "/auditor/delegation", label: "Delegation", icon: SwapOutlined },
   ],
   head: [
     { to: "/head/approvals", label: "High-value approvals", icon: SafetyOutlined },
@@ -40,6 +42,8 @@ export const SIDEBAR_LINKS = {
     { to: "/head/dashboard", label: "Dashboard", icon: DashboardOutlined },
     { to: "/head/policy", label: "Policy rules", icon: SlidersOutlined },
     { to: "/head/audit", label: "Audit trail", icon: HistoryOutlined },
+    { to: "/head/users", label: "New sign-ups", icon: UserAddOutlined },
+    { to: "/head/delegation", label: "Delegation", icon: SwapOutlined },
   ],
 };
 

@@ -86,14 +86,14 @@ def test_render_csv_matches_ard_format_when_two_payments() -> None:
 # ------------------------------------------------------------------ batch flow (API)
 def test_batch_flow_pays_claims_when_verified_and_exported(api: Api, people: People) -> None:
     """E2E-09: create, verify by another user, export, mark paid; trailer equals the total."""
-    one = api.claim(people.employee, 120_000)
+    one = api.claim(people.employee, 40_000)
     two = api.approve(people.manager, api.claim(people.peer, 800_000))
     r = api.post(people.head, "/payouts/batches", {"claim_ids": [one["id"], two["id"]]})
     assert r.status_code == 201, r.text
     batch = r.json()
     assert batch["status"] == "DRAFT"
     assert batch["claim_count"] == 2
-    assert batch["total_paise"] == 920_000
+    assert batch["total_paise"] == 840_000
     assert all(len(i["account_last4"]) == 4 for i in batch["items"])
 
     assert api.post(people.head, f"/payouts/batches/{batch['id']}/export").status_code == 409
@@ -109,7 +109,7 @@ def test_batch_flow_pays_claims_when_verified_and_exported(api: Api, people: Peo
     assert r.status_code == 200
     assert hashlib.sha256(r.content).hexdigest() == exported["file_sha256"]
     rows = list(csv.reader(io.StringIO(r.text)))
-    assert rows[-1][5] == "9200.00"
+    assert rows[-1][5] == "8400.00"
     assert rows[-1][9] == "COUNT=2"
     assert api.get(people.auditor, f"/payouts/batches/{batch['id']}/file").content == r.content
 
@@ -124,7 +124,7 @@ def test_batch_flow_pays_claims_when_verified_and_exported(api: Api, people: Peo
 
 def test_claim_cannot_be_in_two_batches_when_already_batched(api: Api, people: People) -> None:
     """A claim appears in at most one payout item: double payment is impossible."""
-    claim = api.claim(people.employee, 120_000)
+    claim = api.claim(people.employee, 40_000)
     assert (
         api.post(people.head, "/payouts/batches", {"claim_ids": [claim["id"]]}).status_code == 201
     )
@@ -134,7 +134,7 @@ def test_claim_cannot_be_in_two_batches_when_already_batched(api: Api, people: P
 
 
 def test_cancel_returns_claims_to_eligible_when_draft(api: Api, people: People) -> None:
-    claim = api.claim(people.employee, 120_000)
+    claim = api.claim(people.employee, 40_000)
     batch = api.post(people.head, "/payouts/batches", {"claim_ids": [claim["id"]]}).json()
     cancelled = api.post(people.head, f"/payouts/batches/{batch['id']}/cancel").json()
     assert cancelled["status"] == "CANCELLED"
@@ -144,7 +144,7 @@ def test_cancel_returns_claims_to_eligible_when_draft(api: Api, people: People) 
 
 
 def test_payouts_are_role_restricted_when_called(api: Api, people: People) -> None:
-    claim = api.claim(people.employee, 120_000)
+    claim = api.claim(people.employee, 40_000)
     assert api.get(people.auditor, "/payouts/eligible").status_code == 403
     assert (
         api.post(people.auditor, "/payouts/batches", {"claim_ids": [claim["id"]]}).status_code

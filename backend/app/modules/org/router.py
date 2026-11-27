@@ -38,9 +38,10 @@ def get_me(principal: PrincipalDep, service: OrgServiceDep) -> MeRead:
     response_model=list[DepartmentRead],
     status_code=status.HTTP_200_OK,
     operation_id="org_list_departments",
-    responses=error_responses(401, 500),
+    summary="Departments. Public: the self-registration form needs them before sign-in",
+    responses=error_responses(500),
 )
-def list_departments(principal: PrincipalDep, service: OrgServiceDep) -> list[DepartmentRead]:
+def list_departments(service: OrgServiceDep) -> list[DepartmentRead]:
     return service.departments()
 
 
@@ -49,10 +50,10 @@ def list_departments(principal: PrincipalDep, service: OrgServiceDep) -> list[De
     response_model=list[CityRead],
     status_code=status.HTTP_200_OK,
     operation_id="org_list_cities",
-    summary="Cities with tier (hotel limits depend on the tier)",
-    responses=error_responses(401, 500),
+    summary="Cities with tier (hotel limits depend on the tier). Public: used at registration",
+    responses=error_responses(500),
 )
-def list_cities(principal: PrincipalDep, service: OrgServiceDep) -> list[CityRead]:
+def list_cities(service: OrgServiceDep) -> list[CityRead]:
     return service.cities()
 
 

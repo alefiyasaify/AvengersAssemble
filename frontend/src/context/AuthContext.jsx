@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import * as authApi from "../api/authApi";
 import { setSessionExpiredHandler } from "../api/httpClient";
@@ -42,9 +42,18 @@ export function AuthProvider({ children }) {
     queryClient.clear();
   }, [queryClient]);
 
+  // A 401 only means "session expired" if someone was signed in. Requests made while signed
+  // out (e.g. the registration form's lookups) must not clear the cache, or they would refetch
+  // and 401 again in a loop.
+  const statusRef = useRef(status);
+  statusRef.current = status;
+  const onSessionExpired = useCallback(() => {
+    if (statusRef.current === "signedIn") signOutLocally();
+  }, [signOutLocally]);
+
   // Restore an existing session on page load.
   useEffect(() => {
-    setSessionExpiredHandler(signOutLocally);
+    setSessionExpiredHandler(onSessionExpired);
     let cancelled = false;
     authApi
       .getMe()
@@ -59,7 +68,7 @@ export function AuthProvider({ children }) {
     return () => {
       cancelled = true;
     };
-  }, [signOutLocally]);
+  }, [signOutLocally, onSessionExpired]);
 
   const login = useCallback(async (email, password) => {
     const user = await authApi.login(email, password);

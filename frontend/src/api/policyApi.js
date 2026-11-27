@@ -14,3 +14,9 @@ export const listApprovalLevels = () => api.get("/admin/approval-levels");
 
 /** GET /admin/config → AppConfigRead (auto-approve limit, sample rate, delegation days, timezone) */
 export const getAppConfig = () => api.get("/admin/config");
+
+/**
+ * PUT /admin/config (finance head; audited). Send only the fields to change.
+ * auto_approve_max_total_paise = 0 turns auto-approval off: every claim goes to the manager.
+ */
+export const updateAppConfig = (changes) => api.put("/admin/config", changes);

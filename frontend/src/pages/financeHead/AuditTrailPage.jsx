@@ -129,44 +129,30 @@ export default function AuditTrailPage() {
             <LoadingOrError query={claims}>
               {(data) =>
                 data.items.length ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 640, overflowY: "auto" }}>
-                    {data.items.map((c) => {
-                      const st = claimStatus(c.status);
-                      const on = c.id === claimId;
-                      return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          aria-pressed={on}
-                          onClick={() => setClaimId(c.id)}
-                          style={{
-                            textAlign: "left",
-                            border: 0,
-                            borderRadius: 14,
-                            padding: "10px 12px",
-                            cursor: "pointer",
-                            font: "inherit",
-                            background: on ? "#EEF3FF" : "#F3F5FB",
-                            boxShadow: on ? "0 0 0 2px #2563EB" : "none",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 4,
-                          }}
-                        >
-                          <span style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                            <span style={{ fontWeight: 700 }}>{c.claim_no}</span>
-                            <span className="num">{formatINR(c.payable_paise)}</span>
-                          </span>
-                          <span style={{ fontSize: 12, color: "#5B6475" }}>
-                            {c.owner_name} · {c.title}
-                          </span>
-                          <span>
+                  <>
+                    <span style={{ fontSize: 12, color: "#5B6475" }}>
+                      {data.items.length < data.total_estimate ? `Newest ${data.items.length} of ${data.total_estimate} claims · search to narrow` : `${data.items.length} claims`}
+                    </span>
+                    <div className="audit-claim-list">
+                      {data.items.map((c) => {
+                        const st = claimStatus(c.status);
+                        const on = c.id === claimId;
+                        return (
+                          <button key={c.id} type="button" aria-pressed={on} onClick={() => setClaimId(c.id)} className={`audit-claim-card ${on ? "is-selected" : ""}`}>
+                            <span style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+                              <span style={{ fontWeight: 700 }}>{c.claim_no}</span>
+                              <span className="num" style={{ fontWeight: 700 }}>
+                                {formatINR(c.payable_paise)}
+                              </span>
+                            </span>
+                            <span style={{ fontSize: 13, color: "#3F4859", fontWeight: 600 }}>{c.owner_name}</span>
+                            <span style={{ fontSize: 12, color: "#5B6475", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
                             <StatusChip tone={st.tone}>{st.label}</StatusChip>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
                 ) : (
                   <Empty description="No claims match" />
                 )

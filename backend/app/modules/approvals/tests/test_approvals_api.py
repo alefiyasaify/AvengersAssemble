@@ -190,8 +190,8 @@ def test_duplicate_receipt_is_flagged_and_skipped_by_bulk_when_reused(
     """E2E-08: the same receipt file twice -> duplicate flag (forced to the auditor), and bulk
     approve skips it with a reason."""
     data = PNG_MAGIC + b"the-same-bytes"
-    first = api.claim(people.employee, 300_000, receipt_id=api.receipt(people.employee, data))
-    assert first["status"] == "APPROVED"
+    first = api.claim(people.employee, 40_000, receipt_id=api.receipt(people.employee, data))
+    assert first["status"] == "APPROVED"  # within the 500 INR auto-approve limit
     second = api.claim(people.peer, 300_000, receipt_id=api.receipt(people.peer, data))
     finding = second["lines"][0]["findings"][0]
     assert finding["rule_code"] == "DUPLICATE_LINE"
@@ -244,7 +244,7 @@ def test_bulk_approve_caps_at_50_items_when_more_sent(api: Api, people: People) 
 @pytest.mark.usefixtures("sample_everything")
 def test_failed_sample_reopens_claim_at_auditor_when_resolved(api: Api, people: People) -> None:
     """Transition 16: a FAILED sample audit reopens the auto-approved claim at the auditor."""
-    claim = api.claim(people.employee, 120_000)
+    claim = api.claim(people.employee, 40_000)
     queue = api.get(people.auditor, "/review-queue", params={"sample_audit": "true"}).json()
     assert [c["id"] for c in queue["items"]] == [claim["id"]]
     samples = api.get(people.auditor, "/sample-audits", params={"status": "PENDING"}).json()
@@ -266,7 +266,7 @@ def test_failed_sample_reopens_claim_at_auditor_when_resolved(api: Api, people: 
 
 @pytest.mark.usefixtures("sample_everything")
 def test_passed_sample_releases_claim_for_payout_when_resolved(api: Api, people: People) -> None:
-    claim = api.claim(people.employee, 120_000)
+    claim = api.claim(people.employee, 40_000)
     sample_id = api.get(people.auditor, "/sample-audits").json()["items"][0]["id"]
     api.post(people.auditor, f"/sample-audits/{sample_id}/resolve", {"result": "PASSED"})
     eligible = api.get(people.head, "/payouts/eligible").json()

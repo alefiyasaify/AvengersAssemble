@@ -23,7 +23,7 @@
     {"level_no": 3, "role": "FINANCE_HEAD", "min_amount_paise_exclusive": 10000000, "active": true}
   ],
   "app_config": {
-    "auto_approve_max_total_paise": 500000,
+    "auto_approve_max_total_paise": 50000,
     "sample_audit_rate": 0.1,
     "timezone": "Asia/Kolkata",
     "imps_max_paise": 20000000,

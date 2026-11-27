@@ -5801,16 +5801,6 @@
             },
             "description": "Successful Response"
           },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
           "500": {
             "content": {
               "application/json": {
@@ -5822,7 +5812,7 @@
             "description": "Internal Server Error"
           }
         },
-        "summary": "Cities with tier (hotel limits depend on the tier)",
+        "summary": "Cities with tier (hotel limits depend on the tier). Public: used at registration",
         "tags": [
           "org"
         ]
@@ -7536,16 +7526,6 @@
             },
             "description": "Successful Response"
           },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
           "500": {
             "content": {
               "application/json": {
@@ -7557,7 +7537,7 @@
             "description": "Internal Server Error"
           }
         },
-        "summary": "List Departments",
+        "summary": "Departments. Public: the self-registration form needs them before sign-in",
         "tags": [
           "org"
         ]

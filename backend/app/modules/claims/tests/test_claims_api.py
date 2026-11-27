@@ -21,8 +21,8 @@ def test_create_draft_returns_detail_with_edit_actions_when_owner(api: Api, peop
 
 
 def test_submit_auto_approves_clean_claim_when_under_limit(api: Api, people: People) -> None:
-    """E2E-01: a clean 1,200 INR claim is auto-approved and becomes payable."""
-    claim = api.claim(people.employee, 120_000)
+    """E2E-01: a clean 400 INR claim (within the 500 INR auto-approve limit) is auto-approved."""
+    claim = api.claim(people.employee, 40_000)
     assert claim["status"] == "APPROVED"
     assert claim["auto_approved"] is True
     assert claim["lines"][0]["status"] == "AUTO_APPROVED"
@@ -31,12 +31,24 @@ def test_submit_auto_approves_clean_claim_when_under_limit(api: Api, people: Peo
     assert claim["id"] in {e["claim_id"] for e in eligible}
 
 
+def test_submit_routes_clean_claim_to_manager_when_above_auto_approve_limit(
+    api: Api, people: People
+) -> None:
+    """Above 500 INR a receipt is mandatory, so even a clean claim goes to the manager."""
+    claim = api.claim(people.employee, 50_001)
+    assert claim["status"] == "PENDING_MANAGER"
+    assert claim["auto_approved"] is False
+    assert claim["lines"][0]["status"] == "NEEDS_APPROVAL"
+    assert claim["lines"][0]["findings"] == []
+    assert claim["required_levels"] == [1]
+
+
 @pytest.mark.usefixtures("sample_everything")
 def test_sampled_claim_is_held_from_payout_and_hidden_from_owner_when_drawn(
     api: Api, people: People
 ) -> None:
     """C11: a sampled claim is not payable, and the claimant never learns it was sampled."""
-    claim = api.claim(people.employee, 120_000)
+    claim = api.claim(people.employee, 40_000)
     assert claim["status"] == "APPROVED"
     assert claim["sample_audit"] is None
     assert claim["sample_audit_pending"] is False
@@ -77,7 +89,7 @@ def test_submit_excludes_rejected_line_from_payable_when_others_are_clean(
     )
     claim = api.submit(people.employee, draft)
     statuses = sorted(ln["status"] for ln in claim["lines"])
-    assert statuses == ["AUTO_APPROVED", "AUTO_REJECTED"]
+    assert statuses == ["AUTO_REJECTED", "NEEDS_APPROVAL"]
     assert claim["total_paise"] == 400_000
     assert claim["payable_paise"] == 100_000
     assert claim["status"] == "PENDING_MANAGER"
@@ -86,7 +98,8 @@ def test_submit_excludes_rejected_line_from_payable_when_others_are_clean(
 def test_meals_at_exact_cap_pass_when_equal_to_limit(api: Api, people: People) -> None:
     """'Up to' means a value exactly at the cap passes."""
     claim = api.claim(people.employee, 150_000, category="MEALS")
-    assert claim["lines"][0]["status"] == "AUTO_APPROVED"
+    assert claim["lines"][0]["findings"] == []
+    assert claim["lines"][0]["status"] == "NEEDS_APPROVAL"  # above the 500 INR auto-approve limit
 
 
 def test_receipt_missing_rejects_line_when_above_500(api: Api, people: People) -> None:

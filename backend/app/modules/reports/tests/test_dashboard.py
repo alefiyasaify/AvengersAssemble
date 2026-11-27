@@ -11,24 +11,24 @@ def test_p90_uses_nearest_rank_when_values_given() -> None:
 
 
 def test_dashboard_scopes_spend_by_role_when_requested(api: Api, people: People) -> None:
-    api.claim(people.employee, 120_000)  # auto-approved: counts as spend
+    api.claim(people.employee, 40_000)  # auto-approved: counts as spend
     api.claim(people.outsider, 200_000, category="MEALS")  # 2,000 meals: rejected, no spend
     api.approve(people.manager, api.claim(people.peer, 800_000))  # chain-approved
 
     own = api.get(people.employee, "/dashboard/summary").json()
     assert own["scope"] == "own"
-    assert own["spend_by_category"] == [{"category": "OTHER", "amount_paise": 120_000}]
+    assert own["spend_by_category"] == [{"category": "OTHER", "amount_paise": 40_000}]
     assert own["queue_health"] is None
     assert own["sample_audit"] is None
 
     team = api.get(people.manager, "/dashboard/summary").json()
     assert team["scope"] == "team"
-    assert sum(c["amount_paise"] for c in team["spend_by_category"]) == 920_000
+    assert sum(c["amount_paise"] for c in team["spend_by_category"]) == 840_000
 
     company = api.get(people.head, "/dashboard/summary").json()
     assert company["scope"] == "company"
     assert company["spend_by_month"] == [
-        {"month": "2026-11", "category": "OTHER", "amount_paise": 920_000}
+        {"month": "2026-11", "category": "OTHER", "amount_paise": 840_000}
     ]
     assert company["spend_by_department"][0]["department_name"] == "Engineering"
     meals = next(v for v in company["violations"]["by_rule"] if v["rule_code"] == "MEALS_DAILY_CAP")
@@ -43,7 +43,7 @@ def test_dashboard_scopes_spend_by_role_when_requested(api: Api, people: People)
 def test_dashboard_filters_by_category_and_rejects_bad_range_when_given(
     api: Api, people: People
 ) -> None:
-    api.claim(people.employee, 120_000)
+    api.claim(people.employee, 40_000)
     r = api.get(people.head, "/dashboard/summary", params={"category": "MEALS"})
     assert r.json()["spend_by_category"] == []
     r = api.get(

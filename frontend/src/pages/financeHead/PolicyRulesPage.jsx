@@ -1,14 +1,15 @@
+import { EditOutlined, SettingOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { App, Button, Modal, Table } from "antd";
+import { App, Button, Form, Input, InputNumber, Modal, Switch, Table } from "antd";
 import { useState } from "react";
 
-import { getAppConfig, listApprovalLevels, listPolicyVersions, publishPolicyVersion } from "../../api/policyApi";
+import { getAppConfig, listApprovalLevels, listPolicyVersions, publishPolicyVersion, updateAppConfig } from "../../api/policyApi";
 import { LoadingOrError } from "../../components/common/LoadingOrError";
 import { PageHeader } from "../../components/common/PageHeader";
 import { StatusChip } from "../../components/common/StatusChip";
 import { TopBar } from "../../components/layout/TopBar";
 import { useCategories } from "../../hooks/useLookups";
-import { formatINR } from "../../utils/formatMoney";
+import { formatINR, rupeesToPaise } from "../../utils/formatMoney";
 import { ROLE_NAME, formatDate } from "../../utils/statusLabels";
 
 const STATUS_LABEL = { ACTIVE: "Active", DRAFT: "Draft", RETIRED: "Retired" };
@@ -62,6 +63,67 @@ function diffRules(draft, active) {
     .map((r) => ({ code: r.code, before: before[r.code] ? limitText(before[r.code]) : "New rule", after: limitText(r), activeChange: before[r.code] && before[r.code].active !== r.active }));
 }
 
+/** Edit AppConfig (PUT /admin/config). Every change is written to the audit trail by the backend. */
+function SettingsModal({ open, config, onClose }) {
+  const { message } = App.useApp();
+  const queryClient = useQueryClient();
+  const [form] = Form.useForm();
+  const autoOn = Form.useWatch("autoOn", form);
+
+  const save = useMutation({
+    mutationFn: (v) =>
+      updateAppConfig({
+        auto_approve_max_total_paise: v.autoOn ? rupeesToPaise(v.autoLimit) ?? 0 : 0,
+        sample_audit_rate: v.samplePct / 100,
+        delegation_max_days: v.delegationDays,
+        imps_max_paise: rupeesToPaise(v.impsMax) ?? config.imps_max_paise,
+      }),
+    onSuccess: (c) => {
+      queryClient.setQueryData(["policy", "config"], c);
+      message.success(c.auto_approve_max_total_paise > 0 ? "Settings saved" : "Settings saved. Auto-approve is off: every claim now goes to a manager.");
+      onClose();
+    },
+    onError: (e) => message.error(e.message),
+  });
+
+  return (
+    <Modal open={open} title="Edit settings" okText="Save" confirmLoading={save.isPending} onOk={() => form.submit()} onCancel={onClose} destroyOnHidden>
+      <Form
+        form={form}
+        layout="vertical"
+        requiredMark={false}
+        preserve={false}
+        initialValues={{
+          autoOn: config.auto_approve_max_total_paise > 0,
+          autoLimit: config.auto_approve_max_total_paise ? String(config.auto_approve_max_total_paise / 100) : "5000",
+          samplePct: Math.round(config.sample_audit_rate * 100),
+          delegationDays: config.delegation_max_days,
+          impsMax: String(config.imps_max_paise / 100),
+        }}
+        onFinish={(v) => save.mutate(v)}
+      >
+        <Form.Item label="Auto-approve clean claims" name="autoOn" valuePropName="checked" extra="Off: every claim, however small, goes to the manager first. New claims only; submitted claims keep their route.">
+          <Switch />
+        </Form.Item>
+        {autoOn ? (
+          <Form.Item label="Auto-approve up to (₹ payable)" name="autoLimit" rules={[{ validator: (_, v) => (rupeesToPaise(v) > 0 ? Promise.resolve() : Promise.reject(new Error("Enter an amount above ₹0."))) }]}>
+            <Input inputMode="decimal" prefix="₹" />
+          </Form.Item>
+        ) : null}
+        <Form.Item label="Sample audit rate (% of auto-approved claims)" name="samplePct" rules={[{ required: true }]}>
+          <InputNumber min={0} max={100} addonAfter="%" style={{ width: "100%" }} />
+        </Form.Item>
+        <Form.Item label="Longest delegation (days)" name="delegationDays" rules={[{ required: true }]}>
+          <InputNumber min={1} max={90} style={{ width: "100%" }} />
+        </Form.Item>
+        <Form.Item label="IMPS limit per payment (₹)" name="impsMax" rules={[{ validator: (_, v) => (rupeesToPaise(v) !== null ? Promise.resolve() : Promise.reject(new Error("Enter an amount."))) }]}>
+          <Input inputMode="decimal" prefix="₹" />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+}
+
 function PolicyBody({ versions, levels, config }) {
   const { message } = App.useApp();
   const queryClient = useQueryClient();
@@ -72,6 +134,8 @@ function PolicyBody({ versions, levels, config }) {
   const [diffOpen, setDiffOpen] = useState(false);
   const selected = versions.find((v) => v.id === selectedId) ?? active ?? versions[0];
   const changes = selected?.status === "DRAFT" ? diffRules(selected, active) : [];
+
+  const [editingSettings, setEditingSettings] = useState(false);
 
   const publish = useMutation({
     mutationFn: () => publishPolicyVersion(draft.id),
@@ -90,22 +154,27 @@ function PolicyBody({ versions, levels, config }) {
         title="Policy rules"
         description="Limits are data, not code. Edit a draft version, then publish it. Claims already submitted keep the version they were checked under."
         extra={
-          draft ? (
-            <Button
-              type="primary"
-              loading={publish.isPending}
-              onClick={() =>
-                Modal.confirm({
-                  title: `Publish version ${draft.version_no}?`,
-                  content: "New claims will be checked against it. This is written to the audit trail.",
-                  okText: "Publish",
-                  onOk: () => publish.mutateAsync(),
-                })
-              }
-            >
-              Publish version {draft.version_no}
+          <>
+            <Button icon={<SettingOutlined />} onClick={() => setEditingSettings(true)}>
+              Edit settings
             </Button>
-          ) : null
+            {draft ? (
+              <Button
+                type="primary"
+                loading={publish.isPending}
+                onClick={() =>
+                  Modal.confirm({
+                    title: `Publish version ${draft.version_no}?`,
+                    content: "New claims will be checked against it. This is written to the audit trail.",
+                    okText: "Publish",
+                    onOk: () => publish.mutateAsync(),
+                  })
+                }
+              >
+                Publish version {draft.version_no}
+              </Button>
+            ) : null}
+          </>
         }
       />
 
@@ -187,12 +256,22 @@ function PolicyBody({ versions, levels, config }) {
               ))}
             <p style={{ fontSize: 12, color: "#5B6475", lineHeight: 1.5 }}>“Above” means strictly greater. Levels are fixed on a claim when it is submitted.</p>
           </section>
-          <section>
-            <b style={{ fontSize: 15, display: "block", paddingBottom: 6 }}>Settings</b>
+          <section className="panel-alt" aria-labelledby="settings-title" style={{ padding: 20, display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, paddingBottom: 8 }}>
+              <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <b id="settings-title" style={{ fontSize: 15 }}>
+                  Settings
+                </b>
+                <span style={{ fontSize: 12, color: "#5B6475" }}>Apply to new claims straight away</span>
+              </span>
+              <Button type="primary" ghost icon={<EditOutlined />} onClick={() => setEditingSettings(true)}>
+                Edit
+              </Button>
+            </div>
             <div className="kv">
-              <span>Auto-approve up to</span>
+              <span>Auto-approve</span>
               <span className="num" style={{ fontWeight: 600 }}>
-                {formatINR(config.auto_approve_max_total_paise)} payable
+                {config.auto_approve_max_total_paise > 0 ? `Clean claims up to ${formatINR(config.auto_approve_max_total_paise)}` : <StatusChip tone="neutral">Off · every claim goes to a manager</StatusChip>}
               </span>
             </div>
             <div className="kv">
@@ -220,6 +299,8 @@ function PolicyBody({ versions, levels, config }) {
           </section>
         </div>
       </div>
+
+      <SettingsModal open={editingSettings} config={config} onClose={() => setEditingSettings(false)} />
 
       <Modal open={diffOpen} onCancel={() => setDiffOpen(false)} footer={null} width={720} title={`Version ${selected.version_no} vs version ${active?.version_no}`}>
         <Table

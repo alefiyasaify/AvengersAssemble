@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getDashboardSummary } from "../../api/dashboardApi";
 import { HorizontalBarList } from "../../components/charts/HorizontalBarList";
+import { MonthlyStackedBars, monthsBetween } from "../../components/charts/MonthlyStackedBars";
 import { Sparkline } from "../../components/charts/Sparkline";
 import { LoadingOrError } from "../../components/common/LoadingOrError";
 import { SectionTitle } from "../../components/common/SectionTitle";
@@ -18,7 +19,6 @@ import { formatINR, formatLakh } from "../../utils/formatMoney";
 import { ROLE_NAME, ruleLabel } from "../../utils/statusLabels";
 
 const PERIOD_WORD = { MONTH: "month", QUARTER: "quarter", YEAR: "year" };
-const CAT_COLORS = ["#1E3A8A", "#2563EB", "#60A5FA", "#BFDBFE", "#F2A33A", "#94A3B8"];
 const toLakh = (paise) => paise / 100 / 100000;
 const ymd = (d) => d.format("YYYY-MM-DD");
 
@@ -27,52 +27,6 @@ function periodRange(period) {
   const today = dayjs();
   const start = period === "YEAR" ? today.startOf("year") : period === "QUARTER" ? today.month(Math.floor(today.month() / 3) * 3).startOf("month") : today.startOf("month");
   return { from: ymd(start), to: ymd(today) };
-}
-
-/** spend_by_month rows ({ month, category, amount_paise }) → one stacked bar per month. */
-function stackMonths(rows, categoryOrder) {
-  const months = [...new Set(rows.map((r) => r.month))].sort();
-  return months.map((month) => {
-    const byCat = Object.fromEntries(categoryOrder.map((c) => [c, 0]));
-    rows.filter((r) => r.month === month).forEach((r) => (byCat[r.category] = (byCat[r.category] ?? 0) + r.amount_paise));
-    return { month, label: dayjs(`${month}-01`).format("MMM"), values: categoryOrder.map((c) => toLakh(byCat[c] ?? 0)) };
-  });
-}
-
-function StackedMonths({ rows, categoryOrder, categoryName }) {
-  const months = stackMonths(rows, categoryOrder);
-  if (!months.length) return <Empty description="No spend in the last six months" />;
-  const max = Math.max(...months.map((m) => m.values.reduce((a, b) => a + b, 0)), 0.01);
-  return (
-    <>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", fontSize: 12, color: "#3F4859" }}>
-        {categoryOrder.map((c, i) => (
-          <span key={c} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 2, background: CAT_COLORS[i % CAT_COLORS.length] }} />
-            {categoryName(c)}
-          </span>
-        ))}
-      </div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 260 }}>
-        {months.map((m) => {
-          const total = m.values.reduce((a, b) => a + b, 0);
-          return (
-            <div key={m.month} role="img" aria-label={`${m.label}, ${total.toFixed(1)} lakh`} style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
-              <span className="num" style={{ fontSize: 12, fontWeight: 600 }}>
-                {total.toFixed(1)}
-              </span>
-              <span style={{ display: "flex", flexDirection: "column-reverse", width: "100%", maxWidth: 64, borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
-                {m.values.map((v, i) => (
-                  <span key={i} style={{ display: "block", width: "100%", background: CAT_COLORS[i % CAT_COLORS.length], height: v ? Math.max(2, Math.round((v / max) * 200)) : 0 }} />
-                ))}
-              </span>
-              <span style={{ fontSize: 12, color: "#5B6475" }}>{m.label}</span>
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
 }
 
 const hours = (h) => (h === null || h === undefined ? "–" : h >= 48 ? `${(h / 24).toFixed(1)} days` : `${h.toFixed(1)} h`);
@@ -88,7 +42,8 @@ function DashboardBody({ d, trend, period, setPeriod }) {
   const todayText = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   const spendTotal = d.spend_by_category.reduce((s, c) => s + c.amount_paise, 0);
-  const monthTotals = trend ? stackMonths(trend.spend_by_month, [...new Set(trend.spend_by_month.map((r) => r.category))]).map((m) => m.values.reduce((a, b) => a + b, 0)) : [];
+  const trendMonths = trend ? monthsBetween(trend.date_from, trend.date_to) : [];
+  const monthTotals = trendMonths.map((m) => trend.spend_by_month.filter((r) => r.month === m).reduce((s, r) => s + r.amount_paise, 0));
   const at = d.approval_time;
   const decided = at.auto_approved_count + at.chain_count;
   const autoPct = decided ? Math.round((at.auto_approved_count / decided) * 100) : 0;
@@ -96,7 +51,6 @@ function DashboardBody({ d, trend, period, setPeriod }) {
   const queue = d.queue_health ?? [];
   const headQueue = queue.find((q) => q.role === "FINANCE_HEAD");
   const oldest = queue.filter((q) => q.oldest_age_seconds).sort((a, b) => b.oldest_age_seconds - a.oldest_age_seconds)[0];
-  const categoryOrder = trend ? [...new Set(trend.spend_by_month.map((r) => r.category))] : [];
 
   return (
     <div className="ef-page" style={{ gap: 30, paddingTop: 14 }}>
@@ -205,7 +159,7 @@ function DashboardBody({ d, trend, period, setPeriod }) {
       <div className="band">
         <div className="col" style={{ flex: "1.4 1 480px" }}>
           <SectionTitle title="Spend by month" hint="₹ lakh, last six months, stacked by category" />
-          {trend ? <StackedMonths rows={trend.spend_by_month} categoryOrder={categoryOrder} categoryName={categoryName} /> : <Empty />}
+          {trend ? <MonthlyStackedBars rows={trend.spend_by_month} months={trendMonths} categoryName={categoryName} format={(p) => toLakh(p).toFixed(1)} /> : <Empty />}
         </div>
         <div className="col" style={{ flex: "1 1 340px" }}>
           <SectionTitle title="Claim outcomes" hint={`${decided} decided claims this ${periodWord}`} />

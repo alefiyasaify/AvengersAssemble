@@ -6,17 +6,20 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { DesktopLayout } from "./components/layout/DesktopLayout";
 import { EmployeeLayout } from "./components/layout/EmployeeLayout";
 import { ROLE_HOME, useAuth } from "./context/AuthContext";
-import ComingSoonPage from "./pages/ComingSoonPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignInPage from "./pages/SignInPage";
 import ApprovalInboxPage from "./pages/approvals/ApprovalInboxPage";
 import ClaimReviewPage from "./pages/approvals/ClaimReviewPage";
+import DelegationPage from "./pages/approvals/DelegationPage";
 import ReviewQueuePage from "./pages/auditor/ReviewQueuePage";
 import SampleAuditPage from "./pages/auditor/SampleAuditPage";
 import ClaimEditorPage from "./pages/employee/ClaimEditorPage";
+import TeamSpendPage from "./pages/manager/TeamSpendPage";
 import MyClaimsPage from "./pages/employee/MyClaimsPage";
+import MySpendPage from "./pages/employee/MySpendPage";
 import AuditTrailPage from "./pages/financeHead/AuditTrailPage";
 import DashboardPage from "./pages/financeHead/DashboardPage";
+import NewSignupsPage from "./pages/financeHead/NewSignupsPage";
 import PayoutBatchPage from "./pages/financeHead/PayoutBatchPage";
 import PolicyRulesPage from "./pages/financeHead/PolicyRulesPage";
 
@@ -42,7 +45,7 @@ export default function App() {
           <Route path="claims" element={<MyClaimsPage />} />
           <Route path="claims/new" element={<ClaimEditorPage />} />
           <Route path="claims/:id" element={<ClaimEditorPage />} />
-          <Route path="spend" element={<ComingSoonPage title="My spend" endpoint="GET /dashboard/summary" />} />
+          <Route path="spend" element={<MySpendPage />} />
         </Route>
 
         {/* Line manager */}
@@ -50,8 +53,8 @@ export default function App() {
           <Route index element={<Navigate to="inbox" replace />} />
           <Route path="inbox" element={<ApprovalInboxPage />} />
           <Route path="claims/:id" element={<ClaimReviewPage />} />
-          <Route path="team" element={<ComingSoonPage title="Team spend" endpoint="GET /dashboard/summary (team scope)" />} />
-          <Route path="delegation" element={<ComingSoonPage title="Delegation" endpoint="GET, POST /delegations" />} />
+          <Route path="team" element={<TeamSpendPage />} />
+          <Route path="delegation" element={<DelegationPage />} />
         </Route>
 
         {/* Finance auditor */}
@@ -62,6 +65,7 @@ export default function App() {
           <Route path="sample" element={<SampleAuditPage />} />
           <Route path="claims/:id" element={<ClaimReviewPage />} />
           <Route path="payouts" element={<PayoutBatchPage />} />
+          <Route path="delegation" element={<DelegationPage />} />
         </Route>
 
         {/* Finance head */}
@@ -73,6 +77,8 @@ export default function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="policy" element={<PolicyRulesPage />} />
           <Route path="audit" element={<AuditTrailPage />} />
+          <Route path="users" element={<NewSignupsPage />} />
+          <Route path="delegation" element={<DelegationPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

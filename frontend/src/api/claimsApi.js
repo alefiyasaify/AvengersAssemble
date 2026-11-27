@@ -6,6 +6,24 @@ import { api } from "./httpClient";
 /** GET /claims?scope=mine|team|all&status=&q= → Page<ClaimSummary> */
 export const listClaims = (query = {}) => api.get("/claims", { scope: "mine", limit: 100, ...query });
 
+/**
+ * GET /claims, following next_cursor until done or `maxPages` pages (100 each) are read.
+ * → { items, total, truncated }
+ */
+export async function listAllClaims(query = {}, maxPages = 10) {
+  const items = [];
+  let cursor;
+  let total = 0;
+  for (let page = 0; page < maxPages; page += 1) {
+    const res = await listClaims({ ...query, limit: 100, cursor });
+    items.push(...res.items);
+    total = res.total_estimate;
+    cursor = res.next_cursor;
+    if (!cursor) return { items, total, truncated: false };
+  }
+  return { items, total, truncated: true };
+}
+
 /** GET /claims/{id} → ClaimDetail (lines + findings, steps, comments, allowed_actions) */
 export const getClaim = (claimId) => api.get(`/claims/${claimId}`);
 

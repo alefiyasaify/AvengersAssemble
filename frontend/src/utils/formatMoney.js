@@ -15,6 +15,14 @@ export function formatLakh(paise) {
   return `₹${lakh.toFixed(1)} L`;
 }
 
+/** Short label for charts: 2650000 -> "₹26.5k", 18134500 -> "₹1.8 L", 9900 -> "₹99". */
+export function formatCompactINR(paise) {
+  const rupees = Number(paise || 0) / 100;
+  if (rupees >= 100000) return `₹${(rupees / 100000).toFixed(1)} L`;
+  if (rupees >= 1000) return `₹${(rupees / 1000).toFixed(1)}k`;
+  return `₹${Math.round(rupees)}`;
+}
+
 /** User-typed rupees ("1,350" or "1350.5") -> integer paise, or null when not a number. */
 export function rupeesToPaise(input) {
   if (input === null || input === undefined) return null;
