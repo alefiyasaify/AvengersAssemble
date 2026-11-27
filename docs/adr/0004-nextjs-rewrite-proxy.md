@@ -1,6 +1,6 @@
 # ADR-0004: Browser talks to Next.js; `/api/*` is proxied to FastAPI
 
-- Status: Accepted
+- Status: Superseded by ADR-0012
 
 ## Decision
 Next.js `rewrites` forward `/api/:path*` to `BACKEND_INTERNAL_URL`. The browser sees a single origin, so no CORS in normal operation and cookies stay first-party. Backend CORS remains an explicit allow-list for tools and direct access.

@@ -1,5 +1,8 @@
 # 08 Docker and Environments
 
+> **Stack note (2026-11-27, ADR-0012):** there are no Dockerfiles or compose file yet (AI-020). The frontend is a CRA app (`REACT_APP_*` build-time variables, no `next build`, no standalone server); a container image would serve `build/` and proxy `/api` to the backend. The backend variable is `REFRESH_TOKEN_TTL_HOURS` and the demo seed password is `DEMO_PASSWORD` / `SEED_DEMO_PASSWORD`; `backend/.env.example` is authoritative.
+> Reconciling the rest of this file is tracked as AI-018.
+
 ## Principles
 One image per service, multi-stage builds, non-root runtime user, pinned base image versions (by digest in production), small images, health checks, no secrets baked into images.
 

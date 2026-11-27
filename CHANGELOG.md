@@ -8,12 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Frontend: React + Ant Design UI for sign-in, claims, approvals, review queue, sample audits, payouts, dashboard, policy rules and audit trail (My spend, Team spend, Delegation are placeholders).
+- Test pack: Playwright + TypeScript with 100 BDD scenarios and specs, Allure and Winston reporting (`tests/`).
+- Operations runbook `docs/15-runbook.md`; ADR-0012 (as-built frontend and test stack).
 - ExpenseFlow API per the ARD: claims (drafts, lines, policy preview, submit, resubmit, withdraw, timeline, comments, receipt download), approvals (inbox, approve, reject, send back, reassign), delegations, auditor review queue with bulk approve, sample audits, payout batches with maker-checker and the mock bank CSV, role-scoped dashboard summary, `/healthz` and `/readyz` (A-0007).
 - `POST /api/v1/auth/register`: self-registration of inactive employees, activated by the finance head (`GET /admin/users?pending=true`).
 - `make seed`: deterministic demo data (150 employees, 3,000 claims, planted cases) and `seed_manifest.json`.
 
 ### Changed
-- Error codes are UPPER_SNAKE, validation errors are HTTP 400 and lists use cursor pagination (ARD conventions, docs/14 G2-G4). Contract change: regenerate the frontend client (AI-012).
+- Error codes are UPPER_SNAKE, validation errors are HTTP 400 and lists use cursor pagination (ARD conventions, docs/14 G2-G4). Contract change (the frontend was updated by hand, no generated client).
 - Repository foundation: git configuration, root Makefile, pre-commit hooks, commitlint,
   CODEOWNERS, PR and issue templates, contributor and security docs.
 - Developer prerequisites: `scripts/install-prereqs.ps1` (Windows/winget) and `make doctor`.

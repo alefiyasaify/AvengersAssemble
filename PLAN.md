@@ -3,8 +3,8 @@
 > Living roadmap. Answers: **what are we building, in what order, and where are we now?**
 > Update rules are in `WORKFLOW.md`. Completed work is logged in `ACTIONS.md`, decisions in `docs/adr/`.
 
-- Last updated: 2026-11-27 (A-0007)
-- Current phase: **Phase 1: Foundation**
+- Last updated: 2026-11-27 (A-0013)
+- Current phase: **Phase 4: Hardening and release** (Phases 2 and 3 built; Phase 1 tooling items P1-04, P1-06..P1-10 still open and gate the release)
 - Plan owner: <name/team>
 
 ## 1. Vision and scope (summary)
@@ -14,9 +14,9 @@ ExpenseFlow: employees submit expense claims with receipts; a configurable polic
 | Phase | Goal | Exit criteria | Status |
 |---|---|---|---|
 | 0 | Planning and guidelines | Guideline pack, ADRs, prompts reviewed and approved | Done |
-| 1 | Foundation | Repo, backend, frontend, contract pipeline, tests, Docker, CI all green from a clean checkout | In progress |
-| 2 | Vertical slice | One feature works end to end (DB -> API -> UI -> E2E) and validates every convention | Not started |
-| 3 | Feature delivery | v1 feature list from docs/00 delivered module by module | Not started |
+| 1 | Foundation | Repo, backend, frontend, contract pipeline, tests, Docker, CI all green from a clean checkout | In progress (Docker, CI, contract pipeline, agent tooling open) |
+| 2 | Backend domain and vertical slice | Backend domain built to the ARD and verified | Done (2026-11-27) |
+| 3 | Feature delivery | v1 feature list from docs/00 delivered module by module | In progress (3 screens and observability open) |
 | 4 | Hardening and release | Security review, performance budget met, backups tested, staging verified, v1.0.0 tagged | Not started |
 
 ## 3. Task board (Phase 1: Foundation)
@@ -25,11 +25,11 @@ Status values: `todo`, `in-progress`, `blocked`, `in-review`, `done`, `dropped`.
 | ID | Task | Prompt | Owner | Status | Depends on | Notes |
 |---|---|---|---|---|---|---|
 | P1-00 | Orientation, plan approved | Prompt 0 | | done | | |
-| P1-01 | Repository skeleton and git | Prompt 1 | | in-review | P1-00 | Files done (A-0002); git history to be recreated in the cloned repo (AI-004) |
-| P1-02 | Backend skeleton | Prompt 2 | | in-review | P1-01 | A-0003; all acceptance checks pass |
-| P1-03 | Frontend skeleton | Prompt 3 | | in-review | P1-01 | A-0004; all checks pass; real-browser check deferred to P1-05 (AI-008) |
-| P1-04 | Contract pipeline | Prompt 4 | | todo | P1-02, P1-03 | Drift checks done early (A-0004: `make gen-contract`/`check-contract`); remaining: oasdiff breaking check, mock-api, CI job |
-| P1-05 | Test automation framework | Prompt 5 | | todo | P1-04 | |
+| P1-01 | Repository skeleton and git | Prompt 1 | | done | P1-00 | Files A-0002; git history now exists in the cloned repo (AI-004 closed) |
+| P1-02 | Backend skeleton | Prompt 2 | | done | P1-01 | A-0003; 177 tests, 89.99% coverage, ruff/mypy/openapi drift clean (A-0013) |
+| P1-03 | Frontend skeleton | Prompt 3 | | done | P1-01 | Replaced by a React 19 + CRA + Ant Design frontend (ADR-0012); original Next.js skeleton no longer exists |
+| P1-04 | Contract pipeline | Prompt 4 | | in-progress | P1-02, P1-03 | Backend spec drift check works (`make check-openapi`). Open: TS client generation does not apply to the JS frontend (`make gen-client`/`check-contract` call missing pnpm scripts, AI-018), oasdiff, mock-api, CI job |
+| P1-05 | Test automation framework | Prompt 5 | | in-review | P1-04 | Delivered as Playwright + TypeScript (ADR-0012, A-0011) in `tests/`; not committed yet (AI-021) |
 | P1-06 | Docker and compose | Prompt 6 | | todo | P1-02, P1-03 | |
 | P1-07 | CI workflows | Prompt 7 | | todo | P1-05, P1-06 | |
 | P1-08 | Claude Code settings, hooks, commands | Prompt 8 | | todo | P1-01 | |
@@ -41,36 +41,36 @@ Break these down when the phase starts (use IDs `P2-xx`, `P3-xx`, `P4-xx`).
 
 | ID | Item | Phase | Owner | Status |
 |---|---|---|---|---|
-| P2-01 | ExpenseFlow architecture: docs/00, docs/13, ADR-0009/0010, then ARD adopted (ADR-0011, docs/14) | 2 | | in-review |
+| P2-01 | ExpenseFlow architecture: docs/00, docs/13, ADR-0009/0010, then ARD adopted (ADR-0011, docs/14) | 2 | | done |
 | P2-00 | Resolve ARD vs guideline conflicts G1-G8 (docs/14 section A) (resolved 2026-11-27 by the project lead, docs/14 A) | 2 | | done |
-| P2-02 | Backend org + auth: departments, users/roles, login/logout/me, cookie JWT + CSRF, rate limit (F-001) | 2 | | in-progress |
-| P2-03 | Backend audit trail: append-only audit_events + DB triggers (F-008) (A-0007) | 2 | | in-review |
-| P2-04 | Backend policy engine, tests first: rule catalogue, versioned config, evaluation (F-003) (A-0007) | 2 | | in-review |
-| P2-05 | Backend claims + lines + receipts + state machine, own-data visibility (F-002) (A-0007) | 2 | | in-review |
-| P2-06 | Backend approval chain: steps, comment, send back, delegation, separation of duties (F-004) (A-0007) | 2 | | in-review |
-| P2-07 | Backend auditor queue: filters, bulk approve, 10% sample audit (F-005) (A-0007) | 2 | | in-review |
-| P2-08 | Backend payout batches + mock bank CSV + mark paid (F-006) (A-0007) | 2 | | in-review |
-| P2-09 | Backend reports API: spend by category/department/month, violations, avg approval time (F-007) (A-0007) | 2 | | in-review |
-| P2-10 | Seed data: 150 employees, 8 departments, hierarchy, 3,000 historical claims with planted duplicates/breaches (F-009) (A-0007, `make seed`) | 2 | | in-review |
-| P3-01 | Frontend auth + app shell + role-based navigation | 3 | | todo |
-| P3-02 | Frontend claim capture (mobile-friendly), drafts, submit, clarification | 3 | | todo |
-| P3-03 | Frontend approver inbox with side-by-side receipt viewer, delegation | 3 | | todo |
-| P3-04 | Frontend auditor queue: dense table, filters, bulk approve, sample audit | 3 | | todo |
-| P3-05 | Frontend payouts: batch, export CSV, mark paid | 3 | | todo |
-| P3-06 | Frontend dashboard + policy view | 3 | | todo |
-| P3-07 | 10 written E2E cases, defect log, security checklist run (Testing phase) | 3 | | todo |
-| P3-08 | SRE: metrics (queue size, approval age, latency), dashboard, alert on oldest pending approval, runbook | 3 | | todo |
+| P2-02 | Backend org + auth: departments, users/roles, login/logout/me, cookie JWT + CSRF, rate limit (F-001) (auth/org integration tests still thin, AI-014) | 2 | | done |
+| P2-03 | Backend audit trail: append-only audit_events + DB triggers (F-008) (A-0007) | 2 | | done |
+| P2-04 | Backend policy engine, tests first: rule catalogue, versioned config, evaluation (F-003) (A-0007) | 2 | | done |
+| P2-05 | Backend claims + lines + receipts + state machine, own-data visibility (F-002) (A-0007) | 2 | | done |
+| P2-06 | Backend approval chain: steps, comment, send back, delegation, separation of duties (F-004) (A-0007) | 2 | | done |
+| P2-07 | Backend auditor queue: filters, bulk approve, 10% sample audit (F-005) (A-0007) | 2 | | done |
+| P2-08 | Backend payout batches + mock bank CSV + mark paid (F-006) (A-0007) | 2 | | done |
+| P2-09 | Backend reports API: spend by category/department/month, violations, avg approval time (F-007) (A-0007) | 2 | | done |
+| P2-10 | Seed data: 150 employees, 8 departments, hierarchy, 3,000 historical claims with planted duplicates/breaches (F-009) (A-0007, `make seed`) | 2 | | done |
+| P3-01 | Frontend auth + app shell + role-based navigation | 3 | | done |
+| P3-02 | Frontend claim capture (mobile-friendly), drafts, submit, clarification | 3 | | done |
+| P3-03 | Frontend approver inbox with side-by-side receipt viewer, delegation (delegation screen is still "coming soon", AI-016) | 3 | | in-review |
+| P3-04 | Frontend auditor queue: dense table, filters, bulk approve, sample audit | 3 | | done |
+| P3-05 | Frontend payouts: batch, export CSV, mark paid | 3 | | done |
+| P3-06 | Frontend dashboard + policy view (My spend and Team spend screens are still "coming soon", AI-016) | 3 | | in-review |
+| P3-07 | 10 written E2E cases, defect log, security checklist run (Testing phase) (tests/ pack: 100 scenarios, 219 tests, 217 pass; defects F-1, F-2 open (AI-019)) | 3 | | in-review |
+| P3-08 | SRE: metrics (queue size, approval age, latency), dashboard, alert on oldest pending approval, runbook (runbook done: docs/15; metrics, dashboard and alert not built, AI-020) | 3 | | in-progress |
 | P4-01 | Security review against docs/12 | 4 | | todo |
 | P4-02 | Performance budget check (LCP, p95 latency) | 4 | | todo |
-| P4-03 | Backup and restore drill for SQLite | 4 | | todo |
+| P4-03 | Backup and restore drill for SQLite (procedure written in docs/15 section 6; drill not run) | 4 | | todo |
 | P4-04 | Release v1.0.0 | 4 | | todo |
 
 ## 5. Milestones
 | Milestone | Target date | Status | Linked tasks |
 |---|---|---|---|
-| M1 Foundation green on clean checkout | <date> | Not started | P1-* |
-| M2 Vertical slice demo | <date> | Not started | P2-* |
-| M3 v1 feature complete | <date> | Not started | P3-* |
+| M1 Foundation green on clean checkout | <date> | At risk: no Docker, no CI | P1-* |
+| M2 Vertical slice demo | 2026-11-27 | Done | P2-* |
+| M3 v1 feature complete | <date> | At risk: 3 screens, metrics | P3-* |
 | M4 v1.0.0 release | <date> | Not started | P4-* |
 
 ## 6. Open decisions
@@ -79,6 +79,7 @@ Break these down when the phase starts (use IDs `P2-xx`, `P3-xx`, `P4-xx`).
 | D-001 | Auth approach (Bearer vs HttpOnly cookie via Next.js server) | A, B | before first protected feature | | HttpOnly cookie JWTs + Bearer for tools: [ADR-0006](docs/adr/0006-auth-httponly-cookie-jwt.md) |
 | D-003 | Identifier format (UUIDv7 vs ULID) | A, B | before first table | | UUIDv7: [ADR-0007](docs/adr/0007-uuidv7-identifiers.md) |
 | D-004 | Server-side API calls and build-time frontend config | rewrites + direct server client, runtime proxy | before P1-06 | | Rewrites + `serverApiClient`, build args: [ADR-0008](docs/adr/0008-frontend-api-access-paths.md) |
+| D-005 | Frontend stack (React + CRA + Ant Design, JavaScript) and test stack (Playwright + TypeScript) | Next.js + pytest plan, or as built | before release | | Accepted as built: [ADR-0012](docs/adr/0012-as-built-frontend-and-test-stack.md) |
 | D-002 | Hosting target for staging and production | <options> | before P1-07 release workflow | | |
 
 ## 7. Risks
@@ -87,7 +88,7 @@ Break these down when the phase starts (use IDs `P2-xx`, `P3-xx`, `P4-xx`).
 | R-01 | SQLite write contention as usage grows | Low | Med | One instance, short transactions, Postgres-ready repositories (ADR-0003) | | Open |
 | R-02 | Contract drift between teams | Med | High | CI drift and breaking-change checks | | Open |
 | R-03 | Two PRs create conflicting Alembic migrations | Med | Med | Single-head CI check, re-parent rule | | Open |
-| R-04 | Fast-moving toolchain (Next.js 16, Vitest 5, MSW 3, Starlette 1.x) changes APIs under us | Med | Med | Lockfiles committed; read bundled docs (frontend/AGENTS.md); Dependabot PRs with CI | | Open |
+| R-04 | Fast-moving toolchain (React 19, Ant Design 6, Starlette 1.x) changes APIs under us | Med | Med | Lockfiles committed; read bundled docs (frontend/AGENTS.md); Dependabot PRs with CI | | Open |
 
 ## 8. Open questions
 | ID | Question | Asked by | Answer | Date resolved |
@@ -107,3 +108,4 @@ Break these down when the phase starts (use IDs `P2-xx`, `P3-xx`, `P4-xx`).
 | 2026-11-27 | ARD received and adopted as the contract (ADR-0011); P2-02..P2-09 first cut built, being re-aligned to the ARD (docs/14 section B); P2-00 added for guideline conflicts | agent (Claude) |
 | 2026-11-27 | A-0007: backend re-aligned to the ARD; P2-00 done; P2-03..P2-10 in review; Q-04 added for the rules decided where the ARD is silent | agent (Claude) |
 | 2026-11-27 | Added P1-10 (agent skills, referenced by SKILLS.md and counted by PROGRESS.md); Prompt 11 written for P1-09/P1-10. Needs plan-owner approval (scope) | agent (Claude) |
+| 2026-11-27 | A-0013: close-out audit after development was declared complete. Phase 2 done; Phase 3 mostly done; P1-01..P1-03 done, P1-05 in review; frontend stack changed to CRA and tests to TypeScript (ADR-0012); open items listed as AI-016..AI-021; current phase set to 4 | agent (Claude) |

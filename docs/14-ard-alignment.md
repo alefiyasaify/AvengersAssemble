@@ -52,10 +52,12 @@ camera input, client-side downscale to 1600 px, Indian number grouping, 2 s auto
 `policy-preview`; buttons rendered only from `allowed_actions`; features `claims, approvals,
 review, payouts, dashboard, admin`.
 
+**Status (A-0013, 2026-11-27):** built as a CRA app (ADR-0012, plain routes, not the Next.js paths above). Found in the code: sign-in, my claims and editor with camera `capture`, advisory live policy check and the `policy-preview` call, buttons from `allowed_actions`, approver inbox and claim review with keyboard shortcuts, review queue, sample audits, payouts, dashboard, policy rules, audit trail. Not found: pdf.js receipt viewer, virtualised table, autosave, `review_duration_ms`; Delegation, My spend and Team spend are placeholders (AI-016). Not verified in this audit: client-side downscale, Indian number grouping.
+
 Table names stay plural `snake_case` (docs/03); ARD section 7 names map one-to-one (`claim` -> `claims`).
 
 ## E. Status after A-0007 (backend re-alignment, 2026-11-27)
-Section B rows, as built and tested in `backend/` (168 tests, coverage 86.97%):
+Section B rows, as built and tested in `backend/` (177 tests, coverage 89.99%, 2026-11-27):
 
 | Area | Status | Where |
 |---|---|---|
@@ -92,5 +94,5 @@ Section B rows, as built and tested in `backend/` (168 tests, coverage 86.97%):
 
 ### Still open
 - `Idempotency-Key` storage (24 h) is not implemented (AI-013).
-- The frontend's generated client is out of date with `openapi.json`; regenerate with `make gen-contract` in a frontend PR (AI-012, contract-change label).
+- The frontend has no generated client (ADR-0012, AI-012 dropped); contract drift is caught by the `tests/` pack, and `make check-contract` still calls missing pnpm scripts (AI-018).
 - `/metrics`, the nightly audit-chain job and alerts: P3-08.

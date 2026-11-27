@@ -1,35 +1,33 @@
-# Tests (Playwright E2E + contract)
+# Tests (Playwright + TypeScript, BDD features and specs)
 
-Scope: everything under `tests/`. Root rules in `../CLAUDE.md` also apply.
+Scope: everything under `tests/`. Root rules in `../CLAUDE.md` also apply. Full guide: `README.md`; plan and traceability: `docs/TEST_PLAN.md`.
 
-Status: not scaffolded yet (PLAN P1-05). Until then this file is the spec for that step.
+Status: scaffolded and running against the real backend and frontend. This replaces the earlier Python/pytest plan (the team chose TypeScript).
+The backend's own API-level cases (E2E01-E2E10, bypass controls C2-C13) in `../backend/tests` remain; this pack adds black-box API, UI and BDD coverage on top.
 
 ## Stack
-Python 3.12, pytest, pytest-playwright, pytest-xdist, Schemathesis, polyfactory/faker, axe-playwright, uv, Ruff, mypy.
+Playwright (`@playwright/test`) + TypeScript, `playwright-bdd` (Gherkin features compiled to specs), `allure-playwright` (report), `winston` + `winston-daily-rotate-file` (logs), `dotenv`.
 
 ## Commands (run in `tests/`)
-- `make e2e-smoke` run `-m smoke` against the running stack
-- `make e2e` full regression (the ROOT `make e2e` instead runs `stack-up` + `e2e-smoke`), `make contract` Schemathesis against `../backend/openapi.json`
-- `make stack-up` / `make stack-down` start/stop the isolated test stack (`docker compose --profile e2e`)
-- `make lint`, `make typecheck`
+- `npm test` features + specs; `npm run test:features` / `npm run test:specs`; `npm run test:smoke`; `npm run test:regression`
+- `npm run bddgen` regenerate specs from features (needed after editing a `.feature`; the npm scripts do it)
+- `npm run typecheck`; `npm run allure:generate` then `allure:open`; `npm run clean`
+- `TEST_ENV=local|qa|staging|demo` selects `env/<name>.env`
 
 ## Layout
-`e2e/pages` page objects, `e2e/flows` reusable actions, `e2e/specs` tests, `contract/`, `data/` factories, `utils/`, `conftest.py` fixtures.
+`features/{api,ui,mobile}` Gherkin; `src/steps` step definitions; `specs/<suite>` hand-written tests; `src/pages` page objects; `src/api` typed services; `src/data` factories and scenarios; `src/core` fixtures, logger, allure helpers, scenario world; `config/environments.ts` env, personas, status names.
 
 ## Rules
-- Selectors: `get_by_role` / `get_by_label` first; `data-testid` only when necessary; no layout-bound CSS/XPath.
-- No `sleep`; use web-first assertions and auto-waiting.
-- Assertions live in tests, locators and actions in page objects.
-- Tests are independent, parallel-safe and order-agnostic; each creates its own uniquely named data via API/seed helpers.
-- Authenticate once via `storage_state`, not per test.
-- Markers: `smoke`, `regression`, `flaky_quarantine`. Flaky test = bug: quarantine, ticket, 5-day SLA.
-- Config via env (`BASE_URL` default `http://localhost:3000`, `API_URL` default `http://localhost:3000/api/v1`, i.e. through the frontend proxy like a browser); `.env.example` committed.
-- Prefer accessible selectors that already exist in the UI (e.g. the home page `region` "System status" and its `Operational`/`Unavailable` badge); report missing labels as findings instead of adding test ids silently.
-- Error responses must match the envelope in `docs/02` (`error.code`, `error.message`, `error.request_id` = `X-Request-ID`).
-See `@../docs/06-testing-strategy.md`.
+- Tests follow the product: never edit `frontend/` or `backend/` to make a test pass. API shapes come from `backend/openapi.json`; UI selectors from the real components (roles, labels, visible text; the UI has no `data-testid`). Report missing labels as findings.
+- Selectors live in `src/pages`, API calls in `src/api`, assertions in specs and steps. No `sleep`; use web-first assertions and `expect.poll`.
+- Tests are independent and create their own uniquely named data. Employees and managers are provisioned per run through the head's admin API (`src/api/session.ts`); payout tests use seeded payable claims (the API cannot create bank accounts).
+- Money is integer paise (`inr()`); boundary cases go at, just below, just above each limit. Never hard-code policy values in the UI or services; the boundary tables in specs and features are the only place.
+- Logs: `logs/app-YYYY-MM-DD.log` (daily), `logs/execution.log` (latest run only), `logs/error.log` (all failures). Do not log secrets; `getLogger()` masks sensitive keys.
+- Tag every test (`@smoke`, `@regression`, area tag); mark tests that only read data `@readonly` (the only ones that run when `EF_READ_ONLY=true`).
+- Error responses must match the envelope in `docs/02` (`error.code` is `UPPER_SNAKE`, `error.request_id` equals `X-Request-ID`).
 
 ## Don'ts
-- Never touch or point at the dev database; the e2e stack has its own volume.
-- Never rely on test execution order or on data from other tests.
-- Never hit third-party services; stub them.
-- Never expose `/api/v1/test/*` helpers outside `APP_ENV=test`.
+- Never point the pack at the dev database; use a seeded throwaway database (it leaves `qa.*` users behind).
+- Never rely on test order or data from other tests.
+- Never hit third-party services.
+- Never commit `env/*.env`, `logs/`, `allure-*`, `.features-gen/`.

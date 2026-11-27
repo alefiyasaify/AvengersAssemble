@@ -2,9 +2,7 @@
 
 ## System context
 ```
-Browser --HTTPS--> Next.js (3000) --/api/* rewrite--> FastAPI (8000) --> SQLite file (volume)
-                      |                                    ^
-                      +-- server components may call ------+  (server-side, same API contract)
+Browser --HTTPS--> React app (3000) --/api/* proxy--> FastAPI (8000) --> SQLite file (volume)
 ```
 
 ## Principles
@@ -40,16 +38,15 @@ modules/<name>/
 ```
 Allowed dependencies: `router -> service -> repository -> models`. A module may call another module's **service** only, never its repository or models.
 
-## Frontend feature model
+## Frontend layout (as built, ADR-0012)
 ```
-features/<name>/
-  components/  hooks/  api/  schemas/  types.ts  index.ts (public exports only)
+src/  App.jsx (routes)  api/ (one module per backend area)  context/AuthContext.jsx  hooks/  utils/
+      components/{layout,common,charts}  pages/<role>/<Name>Page.jsx
 ```
-`app/` routes compose features. Features may import `shared/`, never each other's internals (use the feature's `index.ts`).
+Pages compose components and call `api/` modules through React Query; only `api/httpClient.js` calls `fetch`. See `frontend/CLAUDE.md`.
 
 ## Data flow (typical read)
-- Browser (client component): feature hook -> feature `api/` function -> `apiClient` (generated types) -> same-origin `/api/v1/...` -> Next.js rewrite -> router -> service -> repository -> SQLite.
-- Server component: feature `api/` function -> `serverApiClient` -> `BACKEND_INTERNAL_URL/api/v1/...` -> router -> service -> repository -> SQLite (ADR-0008).
+- Browser: page -> TanStack Query hook -> `src/api/<area>Api.js` -> `httpClient.js` (the only `fetch`, adds cookies and CSRF header) -> same-origin `/api/v1/...` -> dev proxy -> router -> service -> repository -> SQLite (ADR-0012).
 
 ## Current modules and features
 | Side | Name | Purpose | Public interface |
@@ -66,8 +63,12 @@ features/<name>/
 | Backend | `modules/reports` | role-scoped dashboard summary | `reports.service` |
 | Backend | `app/seeds` | deterministic demo seed (`make seed`) via the services above | `python -m app.seeds.generate` |
 | Backend | `modules/_template` | copy-me skeleton (not registered) | - |
-| Frontend | `features/system-status` | shows API/DB status and version | `features/system-status/index.ts` (`SystemStatusCard`, hooks) |
-| Frontend | `features/_template` | copy-me skeleton (not imported) | - |
+| Frontend | `pages/employee` | my claims, claim editor with live advisory policy check | `App.jsx` routes |
+| Frontend | `pages/approvals` | approver inbox, claim review | `App.jsx` routes |
+| Frontend | `pages/auditor` | review queue, sample audits | `App.jsx` routes |
+| Frontend | `pages/financeHead` | dashboard, payout batches, policy rules, audit trail | `App.jsx` routes |
+| Frontend | `ComingSoonPage` | placeholder for My spend, Team spend, Delegation (AI-016) | - |
+| Tests | `tests/` | Playwright + TypeScript: BDD features, specs, Allure | `tests/README.md` |
 
 ## Scaling path
 - Stage 1: one backend container, SQLite on a volume (current).

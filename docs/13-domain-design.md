@@ -1,131 +1,92 @@
-# 13 Domain Design: ExpenseFlow
+# 13 Domain Design: ExpenseFlow (as built)
 
-> **Superseded by the ARD (ADR-0011).** Kept for history; the ARD sections 3-11 are authoritative and
-> `docs/14-ard-alignment.md` lists the differences.
+> The ARD is authoritative (ADR-0011). This doc shows how the code implements it, where each rule is enforced and which test proves it.
+> Differences and open gaps: `docs/14-ard-alignment.md`.
 
 ## Context and containers
 ```
  Employee / Manager / Auditor / Finance head (browser, phone or desktop)
-            |
             | HTTPS (same origin)
             v
- +------------------------+   /api/* rewrite   +-------------------------------------------+
- | Next.js frontend :3000 | -----------------> | FastAPI backend :8000                      |
- | claims, approvals,     |                    |  auth  org  policy  claims  receipts       |
- | audit queue, payouts,  |  server components |  approvals  payouts  reports  audit        |
- | dashboard              | -----------------> |  (modular monolith, service-only calls)    |
- +------------------------+  BACKEND_INTERNAL  +---------------------+---------------------+
-                                                      |                     |
-                                              SQLite (WAL, volume)   receipts/ (files by SHA-256, volume)
-                                                      |
-                                       payout CSV download (mock bank file) -> finance head -> bank (out of scope)
+ +------------------------+   /api/* rewrite   +---------------------------------------------+
+ | Next.js frontend :3000 | -----------------> | FastAPI backend :8000 (modular monolith)    |
+ | renders the API; no    |  server components |  auth org policy receipts claims approvals  |
+ | business rules         | -----------------> |  payouts reports audit health               |
+ +------------------------+  BACKEND_INTERNAL  +------------------+--------------+-----------+
+                                                                   |              |
+                                                      SQLite (WAL, 21 tables)   receipt files (random keys, SHA-256)
+                                                                   |
+                                       payout CSV (mock bank file) -> head downloads it; nothing automated leaves the system
 ```
+Layering: router (HTTP) -> deps -> service (rules, transaction, audit write) -> repository (SQL) -> models. The `policy` engine is pure (no DB, no clock). Enforced by `import-linter` (13 contracts).
 
-## Backend modules and dependencies
-| Module | Owns (tables) | Calls (services only) |
-|---|---|---|
-| `org` | departments, users (role, manager, bank details) | - |
-| `auth` | (none; JWT cookies, ADR-0006) | org |
-| `audit` | audit_events (append-only) | - |
-| `policy` | policy_versions (JSON config, immutable versions) | - |
-| `receipts` | receipts (sha256, mime, size, path) | audit |
-| `claims` | claims, claim_lines, line_flags, claim_comments | org, policy, receipts, audit |
-| `approvals` | approval_steps, delegations | org, claims, audit |
-| `payouts` | payout_batches, payout_items | claims, org, audit |
-| `reports` | (read models over claims/approvals) | claims, approvals |
+## Backend modules
+| Module | Tables | Public interface | Notes |
+|---|---|---|---|
+| `org` | departments, cities, categories, users, bank_accounts | `OrgService` (`person`, `subordinate_ids`, `ancestors`, `bank_details`, `me`, admin) | acyclic hierarchy, `permissions_for(role)` |
+| `auth` | - | login / refresh / logout | cookie JWT + CSRF, lockout after 5 failures, failed logins audited |
+| `audit` | audit_events | `AuditService.record`, `verify_chain` | append-only, SHA-256 hash chain |
+| `policy` | policy_versions, policy_rules, approval_levels, app_config | `PolicyService` (`snapshot`, `publish`, ...), pure `evaluate()` | rules as data, versions immutable once published |
+| `receipts` | receipts | `ReceiptService.upload` / `info` / `stored` | magic-byte check, 5 MB bounded read, storage interface |
+| `claims` | claims, claim_lines, line_findings, approval_steps, claim_comments, delegations, sample_audits, claim_transitions | `ClaimsService` (capture, submit, chain, delegation, samples, visibility, read models) | the workflow engine |
+| `approvals` | - | HTTP API over `ClaimsService` (inbox, step actions, review queue, bulk approve, sample audits, delegations) | thin by design |
+| `payouts` | payout_batches, payout_items | `PayoutService` | maker-checker, ARD CSV |
+| `reports` | - | `ReportsService.summary` | one endpoint, role-scoped |
+| `health` | - | live / ready / version, `/healthz`, `/readyz` | |
 
-Rule: `policy` is pure. `PolicyEngine.evaluate(claim, history, config) -> Evaluation` has no I/O, so every rule is unit-tested without a database (tests are written before the engine).
-
-## Claim state machine
+## Claim state machine (ARD section 4)
 ```mermaid
 stateDiagram-v2
-    [*] --> draft
-    draft --> draft: edit lines / receipts
-    draft --> rejected: submit, any line auto-rejects
-    draft --> approved: submit, all lines pass and total <= auto-approve limit
-    draft --> pending_approval: submit, otherwise (chain created)
-    pending_approval --> pending_approval: step approved, next step exists
-    pending_approval --> approved: last step approved
-    pending_approval --> rejected: any step rejects
-    pending_approval --> clarification_requested: approver sends back
-    clarification_requested --> pending_approval: employee resubmits (policy re-run, chain restarts)
-    clarification_requested --> rejected: resubmission auto-rejects
-    draft --> withdrawn: employee withdraws
-    pending_approval --> withdrawn: employee withdraws
-    clarification_requested --> withdrawn: employee withdraws
-    approved --> in_payout: added to a payout batch (not if sample-audit hold)
-    in_payout --> paid: batch marked paid
-    rejected --> [*]
-    withdrawn --> [*]
-    paid --> [*]
+    [*] --> DRAFT
+    DRAFT --> APPROVED: submit, all lines clean and payable <= auto-approve limit
+    DRAFT --> REJECTED: submit, every line auto-rejected
+    DRAFT --> PENDING_MANAGER: submit, otherwise
+    DRAFT --> WITHDRAWN: owner withdraws
+    PENDING_MANAGER --> PENDING_AUDITOR: approve, level 2 required
+    PENDING_MANAGER --> PENDING_HEAD: approve, level 3 forced
+    PENDING_MANAGER --> APPROVED: approve, last level
+    PENDING_AUDITOR --> PENDING_HEAD: approve, level 3 required
+    PENDING_AUDITOR --> APPROVED: approve, last level
+    PENDING_HEAD --> APPROVED: approve
+    PENDING_MANAGER --> REJECTED: reject (comment)
+    PENDING_AUDITOR --> REJECTED: reject (comment)
+    PENDING_HEAD --> REJECTED: reject (comment)
+    PENDING_MANAGER --> SENT_BACK: send back (comment)
+    PENDING_AUDITOR --> SENT_BACK: send back (comment)
+    PENDING_HEAD --> SENT_BACK: send back (comment)
+    SENT_BACK --> PENDING_MANAGER: resubmit (new round, policy re-run)
+    SENT_BACK --> WITHDRAWN: owner withdraws
+    PENDING_MANAGER --> WITHDRAWN: owner, before any approval
+    APPROVED --> PAID: payout batch marked paid
+    APPROVED --> PENDING_AUDITOR: sample audit FAILED
 ```
-- Transitions live in one table in `claims/state.py`; any other transition raises `ConflictError(code="invalid_transition")`.
-- Only `draft` and `clarification_requested` claims are editable, and only by their owner.
-- `approved` claims with `audit_sample_status = pending` cannot enter a payout batch (Assumption A-6).
+The 23 allowed pairs live in `claims/state.py` and are seeded into `claim_transitions`, where a DB trigger rejects any other `status` update and any insert that is not `DRAFT`. The diagram omits two pairs for readability: `SENT_BACK -> APPROVED` and `SENT_BACK -> REJECTED`, which exist because a resubmit re-runs the policy and can be auto-approved or auto-rejected (ARD transition 13, "or as in rows 1 to 2").
 
-## Policy as configuration (ADR-0010)
-Policy versions are JSON documents in `policy_versions` (immutable, one `active`). Version 1 is seeded from `backend/app/seeds/policy_v1.json`. A claim stores the `policy_version_id` used at its last submission, and every flag stores the rule id, so decisions are reproducible.
-```json
-{
-  "currency": "INR",
-  "auto_approve_max_total_paise": 500000,
-  "sample_audit_rate": 0.10,
-  "approval_thresholds_paise": {"finance_auditor": 2500000, "finance_head": 10000000},
-  "tier1_cities": ["Mumbai", "Delhi", "Bengaluru", "Chennai", "Kolkata", "Hyderabad", "Pune", "Ahmedabad"],
-  "rules": [
-    {"id": "meal_daily_limit", "type": "daily_category_limit", "category": "meal", "limit_paise": 150000, "outcome": "route"},
-    {"id": "hotel_nightly_limit", "type": "tiered_category_limit", "category": "hotel", "tier1_limit_paise": 600000, "other_limit_paise": 400000, "outcome": "route"},
-    {"id": "cab_trip_limit", "type": "per_line_category_limit", "category": "local_cab", "limit_paise": 200000, "outcome": "route"},
-    {"id": "receipt_required", "type": "receipt_required_above", "threshold_paise": 50000, "outcome": "reject"},
-    {"id": "duplicate", "type": "duplicate_detection", "outcome": "route"},
-    {"id": "weekend_spend", "type": "weekend_flag", "outcome": "route"},
-    {"id": "stale_expense", "type": "stale_expense", "max_age_days": 90, "outcome": "route"}
-  ]
-}
-```
-Rule `type`s are implemented in code (a registry of small functions); their parameters, outcomes and on/off live in config. Evaluation: per line, collect flags; a line's outcome is the most severe of its flags (`reject` > `route` > `approve`); the claim outcome follows A-1 to A-3.
+## Policy as configuration
+Rule **types** are code (`policy/engine.py`: daily cap, per-unit cap by tier, per-line cap, receipt required, duplicate, weekend, split window, max age). Rule **instances**, thresholds and scalar settings are database rows. `evaluate(lines, context, snapshot)` is pure; the claims service prepares the read-only context (earlier daily totals, duplicate keys and hashes, recent own lines) from the repository. Every submitted line stores its findings and the claim stores `policy_version_id`, so any decision can be replayed. Rule tests are table-driven from `app/seeds/rule_fixtures.json` (35 cases including boundaries at, just below and just above each limit), written before the engine and shared with the seed.
 
-## Approval chain (ADR-0009)
-At submission (outcome `route`), the chain is **materialised** as ordered `approval_steps` rows: `manager` (assignee = claimant's manager), `finance_auditor` (role pool) if total > 25,000 INR, `finance_head` (role pool) if total > 1,00,000 INR. Only the lowest pending step is actionable. A user may act on a step if they are the assignee, a member of the step's role pool, or the active delegate of the assignee (`delegations` with a date range). Every action records `acted_by` and `on_behalf_of`. Send-back cancels the remaining steps; resubmission creates a fresh chain.
+## Data model (21 tables)
+`departments, cities, categories, users, bank_accounts` | `policy_versions, policy_rules, approval_levels, app_config` | `receipts` | `claims, claim_lines, line_findings, approval_steps, claim_comments, delegations, sample_audits, claim_transitions` | `payout_batches, payout_items` | `audit_events`.
 
-## Data model (main tables)
-```
-departments(id, name, code)
-users(id, email, full_name, employee_code, role[employee|finance_auditor|finance_head], department_id, manager_id -> users, password_hash, bank_account, ifsc, is_active)
-policy_versions(id, version, document JSON, is_active, created_by, created_at)
-claims(id, number, owner_id, title, status, total_paise, policy_version_id, policy_outcome, submitted_at, decided_at, audit_sample_status[none|pending|cleared|issue], payout_batch_id, version)
-claim_lines(id, claim_id, category[meal|hotel|local_cab|travel|other], description, vendor, amount_paise, expense_date, city, receipt_id, outcome)
-line_flags(id, line_id, rule_id, outcome, message)
-receipts(id, owner_id, sha256, content_type, size_bytes, storage_key, original_name)
-approval_steps(id, claim_id, round, sequence, kind[manager|finance_auditor|finance_head], assignee_id, status[pending|approved|rejected|sent_back|cancelled], acted_by_id, on_behalf_of_id, comment, acted_at)
-delegations(id, delegator_id, delegate_id, starts_on, ends_on, revoked_at)
-claim_comments(id, claim_id, author_id, body, created_at)
-payout_batches(id, number, status[draft|exported|paid], total_paise, claim_count, exported_at, paid_at, created_by)
-audit_events(id, occurred_at, actor_id, on_behalf_of_id, action, entity_type, entity_id, data JSON, request_id)   -- UPDATE/DELETE blocked by triggers
-```
+Database constraints in addition to the application checks: CHECK on every status, role and outcome and on `amount_paise > 0`; unique `payout_items.claim_id`; `verified_by_id <> created_by_id`; one PENDING step per (claim, round, level); one ACTIVE policy version; the transition trigger; frozen published rules (trigger); `audit_events` UPDATE and DELETE blocked (trigger).
 
-## Mock bank file (payout CSV)
-```
-H,EXPENSEFLOW,<batch_number>,<YYYYMMDD>,<count>,<total_rupees.paise>
-D,<seq>,<employee_code>,<beneficiary_name>,<bank_account>,<ifsc>,<amount_rupees.paise>,<claim_number>
-...
-T,<count>,<total_rupees.paise>
-```
-UTF-8, comma separated, no quoting except names containing commas (RFC 4180), CRLF line endings. Header and trailer totals must equal the sum of `D` lines.
+## Bypass threat model (ARD section 11): control, layer, proof
+| ID | Bypass | Control | Layer | Proof |
+|---|---|---|---|---|
+| C1 | Split one spend into small claims | `SPLIT_SUSPECT` (3-day window, same vendor or category) forces the auditor | policy | rule fixtures "split claim ..." |
+| C2 | Edit after approval | Lines editable only in DRAFT/SENT_BACK; resubmit starts a new round | service, DB trigger | `test_c2_lines_cannot_change_after_submit`, DB rules test |
+| C3 | Self-approval or colluding hierarchy | Claimant never acts on own claim; chain from the hierarchy; acyclic on every manager change | service | `test_c3_head_cannot_approve_own_claim`, `test_admin_users_create_update_and_reject_cycles` |
+| C4 | Delegation abuse | same-or-higher role, not the claimant, at most 30 days, one active per level, both identities audited | service | `test_delegation_rules_c4` |
+| C5 | Skip a level | Only the open step is actionable (409/403); unique open-step index | service, DB | `test_c5_cannot_act_on_a_step_that_is_not_yours` |
+| C6 | Duplicate evasion | Vendor normalisation and receipt SHA-256 across all employees | policy | fixtures, `test_e2e08_...` |
+| C7 | Pay without a second pair of eyes | creator != verifier; export only from VERIFIED; file hashed and frozen; unique payout item | service, DB | `test_e2e09_batch_verify_export_mark_paid` |
+| C8 | Policy tampering | Immutable published versions, head only, audited with before/after | service, DB trigger | `test_c8_policy_versions_publish_and_freeze` |
+| C9 | Audit tampering | No update/delete path; triggers; hash-chain verifier | DB, service | DB rules test, `test_audit_chain_is_valid_...` |
+| C10 | Bulk approve as a rubber stamp | auditor level only, max 50, skips duplicates, high severity and changed claims; audit event per claim | service, API | `test_e2e08_...` |
+| C11 | Dodge the sample audit | CSPRNG draw in the approval transaction, draw and rate audited, hidden from the employee, payout hold | service | `test_c11_sample_audit_holds_payout_and_failure_reopens` |
+| C12 | Race or double click | conditional `UPDATE ... WHERE version=?`, 409 `CLAIM_VERSION_CONFLICT` | service, DB | `test_c12_stale_version_is_a_409` |
+| C13 | IDOR | 404 for not-yours; receipts served only through the authorised endpoint | service | `test_e2e10_...` |
+| C14 | Odd dates | future dates rejected (`FUTURE_EXPENSE_DATE`); `CLAIM_AGE_LIMIT` seeded inactive | service, policy | age rule: fixture; future date: **test pending (AI-014)** |
 
-## Skeptical finance-auditor review: ways to bypass approvals, and the control for each
-| # | Bypass attempt | Control |
-|---|---|---|
-| 1 | Split one expense into several small claims to stay under thresholds / auto-approve limit | Meal limit is per day across all claims; duplicate detection on vendor+amount+date; dashboard shows per-employee daily totals; thresholds use claim total, and auditor sample hits auto-approved claims |
-| 2 | Approve your own claim (or via your own delegate) | Service rule: actor/on-behalf-of must differ from claimant; delegation to or from claimant blocked for their own claims |
-| 3 | Manager also holds auditor/head role and approves two steps | One person may act on at most one step per claim |
-| 4 | Edit a claim after approval (raise amounts) | Lines editable only in `draft`/`clarification_requested`; resubmission re-runs policy and restarts the chain; optimistic `version` on claims |
-| 5 | Re-use the same receipt image on a new claim | Receipt SHA-256 duplicate flag across all earlier lines |
-| 6 | Change the policy to approve your claim | Policy changes only by finance head, create a new immutable version, are audited; claims keep the version they were evaluated with |
-| 7 | Tamper with or delete the audit trail | No update/delete code path; DB triggers abort UPDATE/DELETE on `audit_events` |
-| 8 | Call the API directly to skip UI checks (e.g. approve a step not yet active, jump status) | All rules in services; explicit state-transition table; only the lowest pending step is actionable |
-| 9 | Delegate to a colleague to rubber-stamp | Delegations are time-boxed, audited, visible on the claim; delegate cannot be the claimant |
-| 10 | Pay a claim twice | Claim can be in at most one batch (`payout_batch_id`); batch immutable after export; `paid` is terminal |
-| 11 | Bulk approve hides bad claims | Bulk approve runs the same per-claim checks and returns per-claim results; flagged claims are listed first |
-| 12 | Backdate expenses to old periods | Expense date cannot be in the future; dates older than 90 days are flagged (`stale_expense`, configurable) |
-| 13 | Upload a non-receipt file / malware | Magic-byte type check (PDF/JPEG/PNG only), 5 MB limit enforced while reading, content-addressed storage (no user-controlled paths); files served inline for the viewer with `nosniff` and `Content-Security-Policy: sandbox` |
+## Mock bank file
+UTF-8, LF, one file per batch named `EXPFLOW_<batch_no>_<YYYYMMDD>.csv`: a column header row, an `H` row, one `D` row per claim and a `T` trailer (`COUNT=n`, exact sum). Amounts come from integer paise (no floats); payment mode is IMPS up to 2,00,000 INR, otherwise NEFT (config); narration is limited to 30 characters of letters, digits and spaces; cells starting with `=`, `+`, `-` or `@` are prefixed with a single quote; generation is deterministic and the stored file is re-hashed on every download.

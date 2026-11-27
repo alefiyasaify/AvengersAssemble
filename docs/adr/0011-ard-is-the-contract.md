@@ -1,6 +1,6 @@
 # ADR-0011: The ExpenseFlow ARD is the frontend/backend/database contract
 
-- Status: Accepted (conflict resolutions G1-G8 in docs/14 pending sign-off)
+- Status: Accepted; conflict resolutions G1-G8 (docs/14) signed off 2026-11-27
 - Date: 2026-11-27
 - Deciders: project lead
 - Supersedes: ADR-0009 and ADR-0010 where they differ from the ARD

@@ -1,5 +1,8 @@
 # 11 Onboarding (target: productive in 15 minutes)
 
+> **Stack note (2026-11-27, ADR-0012):** use `npm` (not pnpm) in `frontend/` and `tests/`; `make up` does not work yet (no Docker files); run E2E with `npm test` in `tests/` against a running stack (`make e2e` is a no-op). Operations guide: `docs/15-runbook.md`.
+> Reconciling the rest of this file is tracked as AI-018.
+
 ## Prerequisites
 Git, Docker Desktop (Compose v2), Node LTS + pnpm, Python 3.12 + uv, GNU make, pre-commit. Optional: Claude Code.
 

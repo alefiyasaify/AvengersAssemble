@@ -1,0 +1,10 @@
+node_modules/
+allure-results/
+allure-report/
+playwright-report/
+cucumber-report/
+test-results/
+.features-gen/
+logs/
+env/*.env
+.env

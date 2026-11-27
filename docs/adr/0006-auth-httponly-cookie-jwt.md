@@ -1,6 +1,6 @@
 # ADR-0006: Browser auth via HttpOnly cookies carrying short-lived JWTs
 
-- Status: Accepted
+- Status: Accepted. Parameters amended by ADR-0011 / ARD section 8 (2026-11-27): refresh token lifetime is 8 hours (not 14 days), accounts lock after 5 failed sign-ins (`LOGIN_MAX_FAILURES`, `LOGIN_LOCKOUT_MINUTES`), `GET /me` returns role and permissions. The transport decision is unchanged.
 - Date: 2026-11-27
 - Deciders: project lead (resolves PLAN D-001)
 
