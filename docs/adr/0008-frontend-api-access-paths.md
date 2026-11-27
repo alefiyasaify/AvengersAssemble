@@ -1,6 +1,6 @@
 # ADR-0008: Frontend API access paths and build-time configuration
 
-- Status: Accepted
+- Status: Superseded by ADR-0012
 - Date: 2026-11-27
 - Deciders: project lead (refines ADR-0004; resolves orientation gaps on server-side calls)
 

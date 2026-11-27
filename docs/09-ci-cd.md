@@ -1,5 +1,8 @@
 # 09 CI/CD (GitHub Actions)
 
+> **Stack note (2026-11-27, ADR-0012):** there are no CI workflows in `.github/` yet (AI-020, P1-07). Steps that call pnpm, Vitest, `next build` or Python Playwright describe the plan; use `npm` for `frontend/` and `tests/`.
+> Reconciling the rest of this file is tracked as AI-018.
+
 ## Workflows
 | Workflow | Trigger | Jobs |
 |---|---|---|

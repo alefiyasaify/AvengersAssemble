@@ -57,7 +57,7 @@ Additive endpoints beyond the ARD list: `POST /api/v1/auth/register` (public sel
 1. Backend dev changes routers/schemas.
 2. `make gen-openapi` writes `backend/openapi.json` (deterministic, sorted keys). Commit it.
 3. CI fails if the committed spec differs from the generated one (drift check).
-4. `make gen-client` regenerates `frontend/src/shared/api-client/generated/schema.ts` with `openapi-typescript` (deterministic, `GENERATED - DO NOT EDIT` header). Commit the result. `make gen-contract` runs steps 2 and 4 together; `pnpm typecheck` then shows every UI call and MSW mock that must change.
+4. (Plan, not built: the frontend has no generated client, ADR-0012; the hand-written `frontend/src/api/` modules and the `tests/` pack follow the spec instead.) `make gen-client` regenerates `frontend/src/shared/api-client/generated/schema.ts` with `openapi-typescript` (deterministic, `GENERATED - DO NOT EDIT` header). Commit the result. `make gen-contract` runs steps 2 and 4 together; `pnpm typecheck` then shows every UI call and MSW mock that must change.
    `make check-contract` runs both drift checks (backend `check-openapi`, frontend `check:client`).
 5. CI runs `oasdiff breaking` against `main`; a breaking diff fails unless the PR carries `breaking-approved`.
 6. Frontend can develop against the spec with a mock server (Prism) before the backend is ready.

@@ -1,5 +1,8 @@
 # 04 Frontend Guidelines (Next.js)
 
+> **Stack note (2026-11-27, ADR-0012):** the frontend as built is React 19 (JavaScript) on Create React App with Ant Design 6, React Router, TanStack Query and npm (see `frontend/CLAUDE.md`). Passages below about Next.js, TypeScript, Tailwind, MSW, Vitest, generated API client and `features/` folders describe the original plan, not the code.
+> Reconciling the rest of this file is tracked as AI-018.
+
 ## Stack
 Next.js 16 (App Router, Turbopack, Cache Components enabled), React 19, TypeScript `strict`, Tailwind CSS v4 + shadcn/ui conventions, TanStack Query, react-hook-form + zod, `openapi-typescript` + `openapi-fetch`, Vitest + React Testing Library + MSW, ESLint (with `eslint-plugin-boundaries`, `jsx-a11y`), Prettier. Node 24 LTS (`.nvmrc`), pnpm.
 
@@ -28,7 +31,7 @@ src/
 - **Browser code**: `apiClient` from `@/shared/api-client` calls relative `/api/v1/...`; Next.js rewrites proxy it to the backend. Never hard-code backend URLs or ports.
 - **Server code**: `serverApiClient` from `@/shared/api-client/server-client` (server-only) calls `BACKEND_INTERNAL_URL` directly.
 - Wrap calls per feature in `features/<name>/api/` with `unwrap(client.GET(...))` and expose hooks (`useOrders`, `useCreateOrder`). Components never call the client directly.
-- Every failure becomes one typed `ApiError` (`status`, `code`, `message`, `details`, `requestId`): backend envelopes, non-envelope proxy errors (`upstream_unavailable`) and network failures (`network_error`, status 0).
+- Every failure becomes one typed `ApiError` (`status`, `code`, `message`, `details`, `requestId`): backend envelopes (`UPPER_SNAKE` `code`, object `details`), non-envelope proxy errors (`UPSTREAM_UNAVAILABLE`) and network failures (`NETWORK_ERROR`, status 0). `isStale` marks 409 version conflicts.
 - Contract types are aliases of the generated schema (`components["schemas"]["ReadyRead"]`), never hand-written copies.
 
 ## Keeping the UI in sync with the backend
@@ -79,3 +82,11 @@ Unit-test hooks and utilities; component-test behaviour via Testing Library (que
 
 ## Definition of a good PR
 Types pass, lint and format clean, contract in sync (`make check-contract`), tests added, no console errors, accessibility checked, screenshots for UI changes.
+
+## ExpenseFlow screens and behaviour (ARD section 9; not built yet, P3-01..P3-06)
+- **Routes by role:** `/login`; `/claims`, `/claims/new`, `/claims/[id]/edit`, `/claims/[id]` (all); `/approvals`, `/approvals/[claimId]`, `/delegations` (approvers); `/review`, `/sample-audits` (auditor, head); `/payouts`, `/payouts/[batchId]` (head, auditor read and verify); `/dashboard` (scoped); `/admin/policy`, `/admin/users`, `/admin/approval-levels` (head). Navigation comes from `GET /me`; a forbidden route shows a 403 page, a foreign or unknown claim a 404 page.
+- **Claim capture (mobile first, 360 px):** one column; each line a card; sticky bottom bar with "Add line" and "Submit"; receipt input `accept="image/*,application/pdf" capture="environment"` with client-side downscale to 1600 px (the server hashes what it stores); `inputmode="decimal"` amounts with Indian grouping that send paise; date defaults to today; hotel shows nights; city is a searchable select; autosave 2 s after the last change with a "Saved / Not saved" state; inline advisory findings from `policy-preview`; a confirmation sheet with total, payable total and the lines that will be auto-rejected before submit.
+- **Approver review screen (speed-critical):** desktop 55% receipt viewer (pdf.js: zoom, rotate, pages, thumbnails, click a line to jump to its receipt) and 45% summary with finding chips, comment box and action bar; mobile stacked, receipt first. Keys: J/K line, A approve, R reject, S send back, C comment. Reject and send-back need a comment and the form says so first. After a decision, load the next inbox item. Emit a `review_duration_ms` event (open to decision).
+- **Data tables (inbox, review queue, claims, payouts):** TanStack Table with row virtualisation, 36 px rows, sticky header and first column, resizable and hideable columns, right-aligned numbers, status and flag chips with icon plus text; server-side filters and sort mirrored into the URL (cursor pagination); saved presets per user; shift-click range selection and an explicit select-all-matching count; the bulk bar shows count and total and afterwards lists per-item `APPROVED / SKIPPED / FAILED` results with reasons; required states: loading skeleton, empty (naming the filters), error with retry, partial bulk result, and a stale banner on 409.
+- **Session:** expiry redirects to login and returns to the same route; unsaved draft text is kept in memory until the refresh succeeds.
+- **Module boundaries:** `features/claims`, `approvals`, `review`, `payouts`, `dashboard`, `admin` (plus `auth`) with `shared/api-client` and `shared/ui`; a feature never imports another feature.

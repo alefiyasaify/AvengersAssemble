@@ -18,7 +18,9 @@ A change is done only when ALL applicable items are true.
 - [ ] `backend/openapi.json` and the generated client are in sync (`make check-contract` passes; regenerate with `make gen-contract`)
 - [ ] UI code and MSW mocks match the contract (`make typecheck` passes after regeneration)
 - [ ] Breaking-change check passed (or explicitly approved)
-- [ ] Alembic migration added, reviewed, single head, backwards compatible
+- [ ] Alembic migration added, reviewed, single head, backwards compatible; DB-level rules (triggers, constraints) proven by a test
+- [ ] Rule or threshold changes start in `backend/app/seeds/rule_fixtures.json` (boundary cases at, below, above); nothing hard-coded in code or UI
+- [ ] New or changed endpoint: role matrix checked (200/403/404), foreign resources return 404, state changes write an audit event in the same transaction
 - [ ] No DB or env files committed
 
 ## Quality attributes

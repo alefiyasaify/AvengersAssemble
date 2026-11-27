@@ -11,18 +11,25 @@ Status values: `todo`, `in-progress`, `blocked`, `done`, `dropped`. Move finishe
 | AI-001 | Fill docs/00-project-overview.md and the Overview in CLAUDE.md | | docs | | done | Filled from UseCase.docx (A-0006) |
 | AI-002 | Replace placeholder team names in .github/CODEOWNERS | | infra | | todo | |
 | AI-003 | Decide hosting target for staging/production | | infra | | todo | PLAN D-002 |
-| AI-004 | Recreate git history in the cloned repo: commit P1-01 (`chore(infra): bootstrap repository`) and P1-02 (`feat(backend): scaffold FastAPI service`) separately | | infra | | todo | A-0002, A-0003 |
+| AI-004 | Recreate git history in the cloned repo: commit P1-01 (`chore(infra): bootstrap repository`) and P1-02 (`feat(backend): scaffold FastAPI service`) separately | | infra | | done | Repo cloned; history exists on main (A-0013) |
 | AI-005 | Add the tracking enforcement WORKFLOW.md describes but the repo lacks: `ACTIONS.md merge=union` in .gitattributes, "Tracking updated" PR-template checkbox, `scripts/check-tracking.sh`, tracking items in docs/10 | | infra | | in-progress | WORKFLOW.md s6. Done in A-0005: union merge, PR checkbox, docs/10 items. Left: `scripts/check-tracking.sh` + CI (Prompt 11, P1-07) |
 | AI-006 | Install pnpm (`winget install pnpm.pnpm` or `scripts/install-prereqs.ps1`) before P1-03; start Docker Desktop before P1-06 | | infra | | in-progress | pnpm done (12.23); Docker daemon still stopped |
-| AI-007 | Move the frontend CSP to per-request nonces (proxy.ts) and drop `'unsafe-inline'` scripts; requires dynamic rendering, measure the cost | | frontend | | todo | ADR-0008 |
+| AI-007 | Move the frontend CSP to per-request nonces (proxy.ts) and drop `'unsafe-inline'` scripts; requires dynamic rendering, measure the cost | | frontend | | dropped | Next.js CSP no longer applies, frontend is CRA (ADR-0012) |
 | AI-009 | Implement `scripts/progress.py` + `make progress` so the PROGRESS.md snapshot is generated, not hand-written | | infra | | todo | Prompt 11, P1-09 |
 | AI-010 | Re-align backend domain to the ARD (docs/14 section B), then write integration tests; coverage gate currently fails (63.96% < 85%) | | backend | | done | A-0007: 168 tests, coverage 86.97%; remaining gaps listed in docs/14 E |
-| AI-012 | Regenerate the frontend client from the new `backend/openapi.json` (`make gen-contract`, fix `make typecheck`) in a frontend PR with label `contract-change` | | frontend | | todo | A-0007; `make check-contract` fails until then |
+| AI-012 | Regenerate the frontend client from the new `backend/openapi.json` (`make gen-contract`, fix `make typecheck`) in a frontend PR with label `contract-change` | | frontend | | dropped | No generated TS client in the JS frontend (ADR-0012); see AI-018 |
 | AI-013 | Store `Idempotency-Key` + response for 24 h on mutating endpoints (ARD 7, C12) | | backend | | todo | A-0007, docs/14 E |
 | AI-014 | Integration tests for auth (login/lockout/refresh), org admin and policy admin endpoints (coverage 33-52% in those services) | | backend | | todo | A-0007 |
 | AI-015 | Team sign-off on docs/14 E1-E9 (rules built where the ARD is silent) | | docs | | todo | PLAN Q-04 |
-| AI-011 | Frontend features per ARD section 9 after the API matches the ARD | | frontend | | todo | docs/14 section D |
-| AI-008 | Real-browser check of the home page status card (deferred: Edge would not launch under automation here); cover it in the P1-05 smoke spec | | tests | | todo | A-0004 |
+| AI-011 | Frontend features per ARD section 9 after the API matches the ARD | | frontend | | done | Built; three screens still open, see AI-016 (A-0013) |
+| AI-008 | Real-browser check of the home page status card (deferred: Edge would not launch under automation here); cover it in the P1-05 smoke spec | | tests | | done | Covered by the tests/ pack (A-0011) |
+| AI-016 | Build the three screens still routed to ComingSoonPage: My spend, Team spend (`GET /dashboard/summary`), Delegation (`GET/POST /delegations`, `DELETE /delegations/{id}`) | | frontend | | todo | A-0013, PLAN P3-03/P3-06 |
+| AI-017 | Frontend tooling: `npm run lint` fails (ESLint 9 finds no `eslint.config.js`, CRA uses legacy `eslintConfig`); no unit or component tests exist (docs/10 wants 80% coverage); local `node_modules` is incomplete (no `react-scripts`), reinstall with `npm ci` | | frontend | | todo | A-0013 |
+| AI-018 | Reconcile docs and Makefile with the as-built stack (ADR-0012): root Makefile `gen-client`, `check-contract`, `typecheck`, `setup` call pnpm scripts that do not exist; docs 04, 06, 08, 09, 11, SKILLS.md and docs/prompts still describe Next.js, pnpm, pytest | | docs | | todo | A-0013 |
+| AI-019 | Fix the defects the test pack found: map the SQLite lock error to 409 `CLAIM_VERSION_CONFLICT` (backend, F-1); accessible names or test ids on Ant Design selects (frontend, F-2); then rerun to clear the 2 failing tests | | backend, frontend | | todo | A-0011 |
+| AI-020 | Release readiness not built: Dockerfiles and compose (P1-06), CI workflows (P1-07), `/metrics` + dashboard + alert on oldest pending approval (P3-08), scheduled backup and audit-chain verification, RPO/RTO, hosting decision (D-002, AI-003) | | infra | | todo | docs/15 section 11 |
+| AI-021 | Commit and review the uncommitted work on branch `Testing` (tests/ pack, docs/15, tracking updates, docs edits, removal of the ARD pdf and UseCase.docx from the root, new UseCaseDocuments/); confirm the pdf/docx deletions are intended since CLAUDE.md and ADR-0011 still cite the ARD file | | all | | todo | A-0013 |
+| AI-022 | Run the P4 items: security review against docs/12 (P4-01), performance budget (P4-02), backup/restore drill (P4-03), then v1.0.0 (P4-04); also run `pip-audit` and `npm audit` for the frontend | | all | | todo | PLAN Phase 4 |
 
 ## 2. Action log (append-only, newest at the bottom)
 
@@ -166,3 +173,48 @@ IDs: take the next number after the last entry. If two entries collide after a m
 - Migration: none
 - Verification: `pytest app/modules/auth app/modules/org`: 9 passed; full `pytest --cov`: 177 passed, coverage 89.99%; `ruff check`, `ruff format --check`, `lint-imports` (13 kept), `mypy` (123 files), `export_openapi --check`: pass
 - Follow-ups: none new
+
+### A-0011 | 2026-11-27 | tests | Playwright + TypeScript pack: BDD features, specs, Allure, Winston (3 logs)
+- By: agent (Claude Code, claude-sonnet-5-5) on behalf of a team member
+- Type: test
+- Plan refs: P1-05 (tests scaffold; the team chose TypeScript instead of the Python plan)
+- Branch / PR / commits: branch `Testing` (local, not committed)
+- What changed: Rebuilt `tests/` against the real contract (`backend/openapi.json`) and the real React/Ant Design UI. API services, page objects (roles, labels, text; the UI has no test ids), data factories, step definitions. 100 Gherkin scenarios (`features/api|ui|mobile`, run through `playwright-bdd`) and 119 spec tests (`specs/*`) share fixtures. Winston writes `logs/app-<date>.log` (daily), `logs/execution.log` (latest run only, reset in `global-setup.ts`) and `logs/error.log` (all failures). Allure report with epic/feature/severity/traceability and a per-test log attachment. The pack provisions its own employees and managers through the head's admin API (the seed does not link its demo employee to its demo manager). `tests/CLAUDE.md`, README and `docs/TEST_PLAN.md` rewritten.
+- Files/areas touched: tests/ only (+ ACTIONS.md). `frontend/` and `backend/` not changed.
+- Contract impact: none
+- Dependencies (tests/): + `playwright-bdd` (compile Gherkin features to Playwright specs so one runner executes features and specs), + `winston-daily-rotate-file` (one app log per day)
+- Verification (stack: backend on :8000 with a scratch seeded DB, CRA frontend on :3000; password via EF_DEMO_PASSWORD): `npx tsc --noEmit`: pass; `npm test` (219 tests: specs + features): 217 passed, 2 failed; `npm run allure:generate`: report written; the 3 log files written and error.log holds only the failures. Both failures are finding F-1: two simultaneous approvals of one step return 500 (`sqlite3.OperationalError: database is locked`) instead of 409 (ARD 7 / C12). NOT run: Firefox/WebKit, staging/qa environments, `workers` > 1.
+- Follow-ups: AI-new: backend to map the SQLite lock error to 409 `CLAIM_VERSION_CONFLICT` (F-1); frontend to add accessible names / test ids to Ant Design selects (F-2); `/metrics` test once P3-08 lands; extend UI suites as the "coming soon" screens ship
+
+### A-0012 | 2026-11-27 | docs | Operations runbook
+- By: agent (Claude Code, claude-sonnet-5-5) on behalf of a team member
+- Type: docs
+- Plan refs: P3-08 (runbook part), P4-03 (restore drill procedure documented, drill not run)
+- Branch / PR / commits: branch `Testing` (local, not committed)
+- What changed: new `docs/15-runbook.md` (config, start/stop, health checks, logs, backup/restore, routine ops, audit-chain check, troubleshooting, incident steps, known gaps); index row in `docs/CLAUDE.md`.
+- Contract impact: none
+- Migration: none
+- Verification: content derived from reading Makefiles, `config.py`, `db.py`, `openapi.json` paths, auth lockout code and docs/03, 08, 11. No command in the runbook was executed (backup/restore and audit-chain snippets are untested).
+- Follow-ups: run and time the restore drill (P4-03); add Docker/compose, `/metrics`, scheduled backup and audit verification (then update the runbook); define RPO/RTO. Note: CLAUDE.md and docs/04 still say Next.js but `frontend/` is react-scripts (CRA).
+
+### A-0013 | 2026-11-27 | docs | Close-out audit and update of all tracking and status docs
+- By: agent (Claude Code, claude-sonnet-5-5) on behalf of a team member
+- Type: docs
+- Plan refs: all phases (PLAN statuses reconciled), P4-*
+- Branch / PR / commits: branch `Testing` (local, not committed)
+- What changed: PLAN.md (task statuses, phase and milestone status, D-005, change history); PROGRESS.md (snapshot, focus, milestones, metrics, blockers, weekly report); ACTIONS.md open items (AI-004, 007, 008, 011, 012 closed; AI-016..AI-022 added); ADR-0012 (as-built frontend and test stack) superseding ADR-0004, 0005, 0008; README.md, CLAUDE.md, CHANGELOG.md, docs/CLAUDE.md, docs/01, docs/15 aligned to the code.
+- Contract impact: none
+- Migration: none
+- Verification (run in backend/): `uv run pytest -q --cov`: 177 passed, coverage 89.99% (gate 85%); `uv run ruff check .`: pass; `uv run mypy`: no issues in 123 files; `uv run python -m scripts.export_openapi --check`: up to date. Frontend: `npm run lint` FAILED (no ESLint 9 config), `npm test` and `npm run build` could not run (`react-scripts` missing from the local node_modules); not fixed, logged as AI-017. Tests pack: not re-run in this session; the 217/219 result is from A-0011. `make lint-imports`, `pip-audit`, `npm audit`, docker, CI: not run / do not exist.
+- Follow-ups: AI-016 to AI-022
+
+### A-0014 | 2026-11-27 | docs | Runbook refreshed with the close-out state
+- By: agent (Claude Code, claude-sonnet-5-5) on behalf of a team member
+- Type: docs
+- Plan refs: P3-08 (runbook), P4-03
+- Branch / PR / commits: branch `Testing` (local, not committed)
+- What changed: `docs/15-runbook.md`: added section 0 (release status), section 8 (running the test pack, known 2 failures), renumbered later sections, release step gated on AI-020..AI-022, known gaps extended (placeholder screens, frontend tooling, Makefile targets). Also removed stack opinions from ADR-0012, PLAN R-04 and PROGRESS at the user's request (the stack is not up for change).
+- Contract impact: none
+- Migration: none
+- Verification: documentation only; commands in the runbook were taken from `tests/README.md`, the Makefiles and config, and were not executed in this session.
+- Follow-ups: AI-016..AI-022 unchanged

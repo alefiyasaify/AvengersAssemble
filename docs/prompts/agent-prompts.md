@@ -1,5 +1,8 @@
 # Agent Prompts: scaffold the repo with Claude Code
 
+## Status of these prompts (2026-11-27)
+Prompts 0 to 3 are done (A-0001 to A-0004); the contract part of Prompt 4 is done (`make gen-contract`, `make check-contract`), the breaking-change and mock parts are open (P1-04). Prompts 5 to 8, 10 and 11 are open (PLAN P1-05..P1-10). Prompt 9 (vertical slice) was replaced by the ExpenseFlow domain, built to the ARD (A-0006, A-0007); when running the remaining prompts, treat the ARD, `docs/13` and `docs/14` as the domain source of truth.
+
 ## How to use
 1. Create an empty folder, copy this pack into it (it already contains `CLAUDE.md`, `docs/`, and the package `CLAUDE.md` files), open Claude Code there.
 2. Fill in `docs/00-project-overview.md` and the Overview section of `CLAUDE.md` first.

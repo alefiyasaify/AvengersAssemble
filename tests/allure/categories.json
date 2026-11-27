@@ -1,0 +1,7 @@
+[
+  { "name": "Product defects", "matchedStatuses": ["failed"], "messageRegex": ".*expect\\(.*" },
+  { "name": "Access control failures", "matchedStatuses": ["failed"], "messageRegex": ".*(403|404).*" },
+  { "name": "Environment or login problems", "matchedStatuses": ["broken"], "messageRegex": ".*(login failed|ECONNREFUSED|timeout).*" },
+  { "name": "Test defects", "matchedStatuses": ["broken"] },
+  { "name": "Skipped", "matchedStatuses": ["skipped"] }
+]

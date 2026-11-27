@@ -1,6 +1,6 @@
 # ADR-0005: Python (pytest) Playwright for E2E and contract tests
 
-- Status: Accepted
+- Status: Superseded by ADR-0012
 
 ## Decision
 E2E and contract tests are written in Python with pytest-playwright and Schemathesis, in `tests/`, independent of the frontend toolchain.

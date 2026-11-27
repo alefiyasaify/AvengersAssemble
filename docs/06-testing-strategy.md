@@ -1,5 +1,8 @@
 # 06 Testing Strategy
 
+> **Stack note (2026-11-27, ADR-0012):** E2E and API tests are Playwright + TypeScript in `tests/` (BDD features, specs, Allure; guide `tests/README.md`, plan `tests/docs/TEST_PLAN.md`), not Python/pytest. The frontend has no unit tests yet (AI-017). Passages about Vitest, MSW, Schemathesis and `make e2e` describe the original plan.
+> Reconciling the rest of this file is tracked as AI-018.
+
 ## Pyramid and ownership
 | Layer | Tool | Location | Owner | Runs |
 |---|---|---|---|---|
