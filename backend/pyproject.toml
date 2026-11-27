@@ -1,0 +1,226 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "FastAPI + SQLite backend service"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "alembic>=1.20.1",
+    "argon2-cffi>=25.1.0",
+    "fastapi>=0.165.0",
+    "pydantic>=2.14.4",
+    "pydantic-settings>=2.16.3",
+    "pyjwt>=2.15.1",
+    "python-multipart>=0.0.34",
+    "sqlalchemy>=2.1.9",
+    "uuid-utils>=1.2.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.2",
+    "import-linter>=2.17",
+    "mypy>=2.4.1",
+    "pip-audit>=2.10.1",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["app/migrations/versions/*.py.mako"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "S", "C90", "ASYNC", "PT"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+# Tests: assert is the point; fixed fake secrets/passwords are test data.
+"tests/**" = ["S101", "S105", "S106"]
+"conftest.py" = ["S105", "S106"]
+"app/modules/*/tests/**" = ["S101", "S105", "S106"]
+# Revision template always imports `sa`/`op`; empty migrations don't use them.
+"app/migrations/versions/*.py" = ["F401", "E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "scripts", "tests"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app", "tests", "scripts", "conftest.py"]
+warn_unreachable = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests", "app"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
+# The module template is an example, not live code: never collected.
+norecursedirs = ["app/modules/_template", ".venv", "data"]
+filterwarnings = ["error"]
+
+# ---------------------------------------------------------------- coverage
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = ["app/modules/_template/*", "app/migrations/*", "*/tests/*"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true
+exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError", "@overload"]
+
+# ---------------------------------------------------------------- import-linter
+[tool.importlinter]
+root_packages = ["app"]
+include_external_packages = false
+
+[[tool.importlinter.contracts]]
+name = "core never imports modules"
+type = "forbidden"
+source_modules = ["app.core"]
+forbidden_modules = ["app.modules"]
+
+[[tool.importlinter.contracts]]
+name = "module layering: router -> deps -> service -> repository -> models -> schemas"
+type = "layers"
+containers = ["app.modules.health", "app.modules.org", "app.modules.auth", "app.modules.audit", "app.modules.policy", "app.modules.receipts", "app.modules.claims", "app.modules.approvals", "app.modules.payouts", "app.modules.reports", "app.modules._template"]
+layers = ["(router)", "(deps)", "service", "(repository)", "(models)", "(schemas)"]
+exhaustive = false
+
+# One `protected` contract per module: only the module itself (and app.main for its router)
+# may import its internals. Other modules go through `<module>.service` (and may use `schemas`).
+
+[[tool.importlinter.contracts]]
+name = "health internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.health.router",
+    "app.modules.health.deps",
+    "app.modules.health.repository",
+]
+allowed_importers = ["app.modules.health", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "org internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.org.router",
+    "app.modules.org.deps",
+    "app.modules.org.repository",
+    "app.modules.org.models",
+]
+allowed_importers = ["app.modules.org", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "auth internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.auth.router",
+    "app.modules.auth.deps",
+]
+allowed_importers = ["app.modules.auth", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "audit internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.audit.repository",
+    "app.modules.audit.models",
+]
+allowed_importers = ["app.modules.audit"]
+
+[[tool.importlinter.contracts]]
+name = "policy internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.policy.router",
+    "app.modules.policy.deps",
+    "app.modules.policy.repository",
+    "app.modules.policy.models",
+]
+allowed_importers = ["app.modules.policy", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "receipts internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.receipts.router",
+    "app.modules.receipts.deps",
+    "app.modules.receipts.repository",
+    "app.modules.receipts.models",
+]
+allowed_importers = ["app.modules.receipts", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "claims internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.claims.router",
+    "app.modules.claims.deps",
+    "app.modules.claims.repository",
+    "app.modules.claims.models",
+]
+allowed_importers = ["app.modules.claims", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "approvals internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.approvals.router",
+    "app.modules.approvals.deps",
+]
+allowed_importers = ["app.modules.approvals", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "payouts internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.payouts.router",
+    "app.modules.payouts.deps",
+    "app.modules.payouts.repository",
+    "app.modules.payouts.models",
+]
+allowed_importers = ["app.modules.payouts", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "reports internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules.reports.router",
+    "app.modules.reports.deps",
+]
+allowed_importers = ["app.modules.reports", "app.main"]
+
+[[tool.importlinter.contracts]]
+name = "_template internals are private"
+type = "protected"
+protected_modules = [
+    "app.modules._template.router",
+    "app.modules._template.deps",
+    "app.modules._template.repository",
+    "app.modules._template.models",
+]
+allowed_importers = ["app.modules._template"]

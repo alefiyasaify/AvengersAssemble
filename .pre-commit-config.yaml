@@ -1,0 +1,62 @@
+# Install: pre-commit install && pre-commit install --hook-type commit-msg
+# Validate: pre-commit validate-config
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-json
+        exclude: ^frontend/tsconfig.*\.json$
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^(backend|tests)/
+      - id: ruff-format
+        files: ^(backend|tests)/
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.20.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ["@commitlint/config-conventional@19.6.0"]
+
+  - repo: local
+    hooks:
+      - id: block-env-and-db-files
+        name: Block committing .env and SQLite files
+        language: fail
+        entry: "Do not commit .env or SQLite database files (see CLAUDE.md 'Never do')."
+        files: (^|/)(\.env(\..+)?|.+\.db(-wal|-shm|-journal)?)$
+        exclude: (^|/)\.env\.example$
+
+      - id: frontend-eslint
+        name: eslint (frontend)
+        language: system
+        entry: sh -c 'if [ -f frontend/package.json ]; then cd frontend && pnpm exec eslint --max-warnings=0 "${@#frontend/}"; else echo "frontend not scaffolded; skipping"; fi' --
+        files: ^frontend/.*\.(ts|tsx|js|jsx|mjs|cjs)$
+        exclude: ^frontend/src/shared/api-client/generated/
+
+      - id: frontend-prettier
+        name: prettier (frontend)
+        language: system
+        entry: sh -c 'if [ -f frontend/package.json ]; then cd frontend && pnpm exec prettier --check "${@#frontend/}"; else echo "frontend not scaffolded; skipping"; fi' --
+        files: ^frontend/.*\.(ts|tsx|js|jsx|mjs|cjs|json|css|md)$
+        exclude: ^frontend/src/shared/api-client/generated/

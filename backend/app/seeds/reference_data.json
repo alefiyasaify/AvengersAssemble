@@ -1,0 +1,59 @@
+{
+  "categories": [
+    {"code": "MEALS", "name": "Meals"},
+    {"code": "HOTEL", "name": "Hotel"},
+    {"code": "LOCAL_CAB", "name": "Local cab"},
+    {"code": "TRAVEL", "name": "Travel"},
+    {"code": "OTHER", "name": "Other"}
+  ],
+  "cities": [
+    {"name": "Mumbai", "tier": 1}, {"name": "Delhi", "tier": 1}, {"name": "Bengaluru", "tier": 1},
+    {"name": "Chennai", "tier": 1}, {"name": "Hyderabad", "tier": 1}, {"name": "Kolkata", "tier": 1},
+    {"name": "Pune", "tier": 1}, {"name": "Ahmedabad", "tier": 2}, {"name": "Jaipur", "tier": 2},
+    {"name": "Lucknow", "tier": 2}, {"name": "Chandigarh", "tier": 2}, {"name": "Kochi", "tier": 2},
+    {"name": "Indore", "tier": 2}, {"name": "Bhopal", "tier": 2}, {"name": "Nagpur", "tier": 2},
+    {"name": "Coimbatore", "tier": 2}, {"name": "Visakhapatnam", "tier": 2}, {"name": "Surat", "tier": 2},
+    {"name": "Vadodara", "tier": 2}, {"name": "Mysuru", "tier": 2}, {"name": "Goa", "tier": 2},
+    {"name": "Bhubaneswar", "tier": 2}, {"name": "Guwahati", "tier": 2}, {"name": "Thiruvananthapuram", "tier": 2},
+    {"name": "Noida", "tier": 2}
+  ],
+  "approval_levels": [
+    {"level_no": 1, "role": "MANAGER", "min_amount_paise_exclusive": 0, "active": true},
+    {"level_no": 2, "role": "AUDITOR", "min_amount_paise_exclusive": 2500000, "active": true},
+    {"level_no": 3, "role": "FINANCE_HEAD", "min_amount_paise_exclusive": 10000000, "active": true}
+  ],
+  "app_config": {
+    "auto_approve_max_total_paise": 500000,
+    "sample_audit_rate": 0.1,
+    "timezone": "Asia/Kolkata",
+    "imps_max_paise": 20000000,
+    "delegation_max_days": 30
+  },
+  "policy_rules": [
+    {"code": "MEALS_DAILY_CAP", "type": "daily_cap", "category": "MEALS", "params": {"cap": 150000},
+     "outcome": "REJECT", "severity": "high", "force_level": null, "active": true,
+     "message_template": "Meals on {date} total {total}; the daily limit is {cap}."},
+    {"code": "HOTEL_NIGHT_CAP", "type": "per_unit_cap_by_tier", "category": "HOTEL",
+     "params": {"unit": "night", "cap_by_tier": {"1": 600000, "default": 400000}},
+     "outcome": "REJECT", "severity": "high", "force_level": null, "active": true,
+     "message_template": "Hotel is {amount_per_night} per night; limit for this city is {cap}."},
+    {"code": "CAB_TRIP_CAP", "type": "per_line_cap", "category": "LOCAL_CAB", "params": {"cap": 200000},
+     "outcome": "REJECT", "severity": "high", "force_level": null, "active": true,
+     "message_template": "Local cab of {amount} is above the per-trip limit of {cap}."},
+    {"code": "RECEIPT_REQUIRED", "type": "receipt_required_above", "category": null, "params": {"threshold": 50000},
+     "outcome": "REJECT", "severity": "high", "force_level": null, "active": true,
+     "message_template": "Receipt missing: a receipt is mandatory above {threshold}."},
+    {"code": "DUPLICATE_LINE", "type": "duplicate", "category": null, "params": {},
+     "outcome": "ROUTE", "severity": "high", "force_level": 2, "active": true,
+     "message_template": "Possible duplicate: {match}."},
+    {"code": "WEEKEND_SPEND", "type": "weekend_flag", "category": null, "params": {"weekend_days": [5, 6]},
+     "outcome": "FLAG", "severity": "low", "force_level": null, "active": true,
+     "message_template": "Expense dated {weekday}."},
+    {"code": "SPLIT_SUSPECT", "type": "split_window", "category": null, "params": {"window_days": 3, "threshold_level": 2},
+     "outcome": "ROUTE", "severity": "medium", "force_level": 2, "active": true,
+     "message_template": "Possible split claim: {combined} with the same vendor or category within {window_days} days."},
+    {"code": "CLAIM_AGE_LIMIT", "type": "max_age_days", "category": null, "params": {"max_age_days": 60},
+     "outcome": "FLAG", "severity": "low", "force_level": null, "active": false,
+     "message_template": "Expense is {age_days} days old; the limit is {max_age_days} days."}
+  ]
+}

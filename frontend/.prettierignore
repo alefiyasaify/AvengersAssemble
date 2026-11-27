@@ -1,0 +1,6 @@
+.next
+coverage
+node_modules
+pnpm-lock.yaml
+src/shared/api-client/generated
+AGENTS.md

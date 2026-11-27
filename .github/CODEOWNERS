@@ -1,0 +1,20 @@
+# Placeholder team names: replace @org/* with real GitHub teams. See docs/07-git-workflow.md.
+# Later rules override earlier ones.
+
+*                                             @org/architects
+
+/frontend/                                    @org/frontend-team
+/backend/                                     @org/backend-team
+/tests/                                       @org/qa-team
+
+# Contract artefacts need both teams (contract-change PRs).
+/backend/openapi.json                         @org/backend-team @org/frontend-team
+/frontend/src/shared/api-client/generated/    @org/frontend-team @org/backend-team
+
+# Docs, root config, CI and compose.
+/docs/                                        @org/architects
+/CLAUDE.md                                    @org/architects
+/.github/                                     @org/architects
+/docker-compose*.yml                          @org/architects
+/Makefile                                     @org/architects
+/.pre-commit-config.yaml                      @org/architects

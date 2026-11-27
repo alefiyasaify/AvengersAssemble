@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(winget install --id ezwinports.make -e --scope user --accept-source-agreements --accept-package-agreements --disable-interactivity 2>&1)",
+      "PowerShell($scripts = \"$env:APPDATA\\\\Python\\\\Python312\\\\Scripts\"; $user = [Environment]::GetEnvironmentVariable\\('Path','User'\\); if \\(\\($user -split ';'\\) -notcontains $scripts\\) { [Environment]::SetEnvironmentVariable\\('Path', \"$user;$scripts\", 'User'\\); \"added $scripts\" } else { \"already present\" }; $env:Path = [Environment]::GetEnvironmentVariable\\('Path','Machine'\\) + ';' + [Environment]::GetEnvironmentVariable\\('Path','User'\\); make --version | Select-Object -First 1; uv --version; \\(Get-Command make\\).Source)",
+      "PowerShell(git -C . status 2>&1)"
+    ]
+  }
+}

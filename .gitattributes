@@ -1,0 +1,28 @@
+# Normalise line endings: LF in the repo, regardless of OS.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary files.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.pdf  binary
+*.zip  binary
+
+# Append-only tracking log: concurrent appends merge without conflicts (WORKFLOW.md s5).
+ACTIONS.md merge=union
+
+# Generated artefacts (never edit by hand; collapsed in PR diffs).
+backend/openapi.json                              linguist-generated=true
+frontend/src/shared/api-client/generated/**       linguist-generated=true
+uv.lock                                           linguist-generated=true
+pnpm-lock.yaml                                    linguist-generated=true

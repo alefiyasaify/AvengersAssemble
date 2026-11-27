@@ -1,0 +1,52 @@
+# --- Secrets and environment (docs/07, docs/12) ---
+.env
+.env.*
+!.env.example
+
+# --- SQLite databases (docs/03) ---
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+data/
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+.pnpm-store/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# --- Test output ---
+coverage/
+playwright-report/
+test-results/
+junit*.xml
+coverage.xml
+
+# --- Docker local overrides (docs/08) ---
+docker-compose.override.yml
+
+# --- Local tooling ---
+CLAUDE.local.md
+.claude/settings.local.json
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Source archives of the guidelines pack ---
+*.zip
