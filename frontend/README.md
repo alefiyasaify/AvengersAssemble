@@ -1,53 +1,41 @@
 # Frontend
 
-Next.js 16 (App Router) + React 19 + TypeScript. Talks to the backend only through the API
-contract (`../backend/openapi.json`) via a generated, typed client. Conventions:
-[CLAUDE.md](CLAUDE.md), [docs/04](../docs/04-frontend-guidelines.md), ADR-0004 and ADR-0008.
+ExpenseFlow UI: React 19 (JavaScript) + Ant Design 6, built with Create React App. It talks to the
+backend only through `/api/v1` (see `src/api/`). Conventions: [CLAUDE.md](CLAUDE.md).
 
 ## Quick start
 
 ```sh
-cp .env.example .env      # defaults work for local development
-pnpm install
-pnpm dev                  # http://localhost:3000 (start the backend on :8000 first: make -C ../backend run)
+cp .env.example .env              # defaults work for local development
+npm install                       # on Windows, add --ignore-scripts if a postinstall step fails
+npm start                         # http://localhost:3000
 ```
 
-Or from the repo root: `make setup` then `make dev` (both services). On Windows use Git Bash.
+Start the backend on :8000 first (see `../backend/README.md`; `make seed` prints the demo logins).
+Then sign in with one of those emails and the seed password.
 
 ## How a request flows
 
 ```
-Browser --/api/v1/health/ready--> Next.js :3000 --rewrite--> FastAPI :8000 --> SQLite
-   ^ apiClient (same origin)                      Server Components: serverApiClient -> BACKEND_INTERNAL_URL
+Browser --/api/v1/...--> CRA dev server :3000 --src/setupProxy.js--> FastAPI :8000 --> SQLite
+         (cookies + X-CSRF-Token)
 ```
 
 ## Scripts
 
-| Script                             | What                                                                                             |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `pnpm dev` / `build` / `start`     | Develop / production build (standalone output) / serve on :3000                                  |
-| `pnpm lint`                        | ESLint: boundaries, a11y, strict TS, no raw `fetch`                                              |
-| `pnpm format` / `format:check`     | Prettier (+ Tailwind class sorting)                                                              |
-| `pnpm typecheck`                   | `next typegen && tsc --noEmit`                                                                   |
-| `pnpm test`                        | Vitest + RTL + MSW, coverage gate 80%                                                            |
-| `pnpm gen:client` / `check:client` | Generate / drift-check `src/shared/api-client/generated/schema.ts`                               |
-| `pnpm mock:api`                    | Prism mock of the spec on :4010 (point `BACKEND_INTERNAL_URL` at it to work without the backend) |
-
-## Layout
-
-```
-src/app/                    layout, page, loading, error, not-found, providers
-src/features/system-status/ health/version card (proves browser -> proxy -> API -> DB)
-src/features/_template/     copy to start a feature (README inside)
-src/shared/api-client/      generated/ (never edit), client.ts, server-client.ts, api-error.ts
-src/shared/{ui,lib,config}/ primitives, utilities, zod-validated env
-src/test/                   MSW handlers + render helpers
-```
+| Script                              | What                                            |
+| ----------------------------------- | ----------------------------------------------- |
+| `npm start`                         | Dev server on :3000 with the `/api` proxy       |
+| `npm run build`                     | Production build into `build/`                  |
+| `npm run lint`                      | ESLint (CRA config + jsx-a11y), zero warnings   |
+| `npm run format` / `format:check`   | Prettier                                        |
+| `npm test`                          | Jest via react-scripts (no tests yet)           |
+| `npm run mock:api`                  | Prism mock of `../backend/openapi.json` on :4010 |
 
 ## Environment (`.env.example`)
 
-| Variable               | Scope         | Default                 | Notes                                                       |
-| ---------------------- | ------------- | ----------------------- | ----------------------------------------------------------- |
-| `APP_ENV`              | server, build | `local`                 | `staging`/`production` add HSTS + upgrade-insecure-requests |
-| `BACKEND_INTERNAL_URL` | server, build | `http://localhost:8000` | proxy target; fixed at `next build`                         |
-| `NEXT_PUBLIC_APP_NAME` | public, build | `Avengers Assemble`     | inlined into the bundle; never secrets                      |
+| Variable               | Scope      | Default                 | Notes                                   |
+| ---------------------- | ---------- | ----------------------- | --------------------------------------- |
+| `BACKEND_INTERNAL_URL` | dev server | `http://localhost:8000` | target of the `/api` proxy              |
+| `PORT`                 | dev server | `3000`                  |                                         |
+| `REACT_APP_NAME`       | public     | `ExpenseFlow`           | inlined at build time; never secrets    |

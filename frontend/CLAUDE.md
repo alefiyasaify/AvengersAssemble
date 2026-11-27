@@ -1,43 +1,47 @@
-# Frontend (Next.js)
+# Frontend (React + Ant Design)
 
 Scope: everything under `frontend/`. Root rules in `../CLAUDE.md` also apply.
 
 ## Stack
 
-Next.js 16 App Router (Turbopack, Cache Components), React 19, TypeScript strict, Tailwind v4 + shadcn/ui conventions, TanStack Query, react-hook-form + zod 4, openapi-typescript + openapi-fetch, Vitest 5 + RTL + MSW 3, ESLint (boundaries, jsx-a11y), Prettier, pnpm, Node 24 LTS.
-Next.js 16 APIs differ from older versions: read `node_modules/next/dist/docs/` before using an unfamiliar API (see `AGENTS.md`).
+React 19 in plain JavaScript, Create React App (`react-scripts` 5), Ant Design 6 + `@ant-design/icons`, React Router 7, TanStack Query 5, dayjs, npm, Node 24.
+No TypeScript, no Next.js, no Tailwind. Tests are not written yet (Jest via `react-scripts test` when they are).
 
 ## Commands (run in `frontend/`)
 
-- `pnpm dev` on :3000, `pnpm build`, `pnpm start`
-- `pnpm test` (Vitest + coverage gate 80%), `pnpm lint`, `pnpm format` / `pnpm format:check`, `pnpm typecheck`
-- `pnpm gen:client` regenerate API types from `../backend/openapi.json`; `pnpm check:client` drift check
-- `pnpm mock:api` Prism mock server from the spec on :4010
-- From the repo root: `make gen-contract` (spec + client), `make check-contract` (both drift checks)
+- `npm start` dev server on :3000 (proxies `/api` to the backend, see `src/setupProxy.js`)
+- `npm run build` production build into `build/`
+- `npm run lint` (CRA ESLint config + jsx-a11y), `npm run format` / `npm run format:check`
+- `npm test` (passes with no tests)
+- Install with `npm install --ignore-scripts` on Windows if a postinstall script fails.
 
 ## Layout
 
-`src/app` thin routes -> `src/features/<name>` (components, hooks, api, schemas, types.ts, index.ts) -> `src/shared` (ui, api-client, lib, hooks, config). Test support in `src/test` (MSW, render helpers).
-Dependency direction is one-way: app -> features -> shared. Features and routes import a feature only via its `index.ts`. Enforced by ESLint (`boundaries/dependencies`).
-New feature: copy `src/features/_template` (its `README.md` has the checklist).
+```
+src/
+  index.js, App.jsx        entry + all routes
+  setupProxy.js            dev proxy /api -> BACKEND_INTERNAL_URL (default http://localhost:8000)
+  api/                     one module per backend area; httpClient.js is the only place that calls fetch
+  context/AuthContext.jsx  signed-in user (GET /me), login/logout, ROLE_HOME
+  hooks/                   useIsDesktop, useLookups (departments, cities, categories)
+  utils/                   formatMoney, statusLabels, policyCheck (advisory live check)
+  components/layout|common|charts
+  pages/<role>/<Name>Page.jsx
+```
 
 ## Rules
 
-- Server components by default; `"use client"` only on small interactive leaves.
-- Browser calls: `apiClient` + `unwrap()` from `@/shared/api-client`, relative `/api/v1/...` (proxied). Server code: `serverApiClient` (server-only, `BACKEND_INTERNAL_URL`). Never hard-code backend host or port. ADR-0008.
-- Contract types are aliases of the generated schema; after any backend API change run `make gen-contract` and fix what `pnpm typecheck` reports.
-- Handle errors through the typed `ApiError` (maps the backend error envelope, proxy and network failures). Every fetching route has `loading.tsx` and `error.tsx` (props `{ error: unknown, retry }`).
-- Server state via TanStack Query, URL state via search params; no global store without justification.
-- Forms: react-hook-form + zod; backend remains the validation authority; map `ApiError.fieldErrors()` to fields.
-- Styling: design tokens in `src/app/globals.css` (`@theme`), no ad-hoc colours.
-- Accessibility is required: semantic HTML, labels, keyboard, contrast (WCAG 2.2 AA).
-- Only `NEXT_PUBLIC_*` env vars reach the browser; never put secrets there. Rewrites, headers and `NEXT_PUBLIC_*` are fixed at build time.
-- Tests: MSW handlers in `src/test/msw` typed with the generated schema; unhandled requests fail.
-  See `@../docs/04-frontend-guidelines.md` for detail.
+- Talk to the backend only through `src/api/*` -> `httpClient.js`, relative `/api/v1/...`. Never hard-code the backend host.
+- Auth is the backend's HttpOnly cookie session (ADR-0006). `httpClient` echoes the `ef_csrf` cookie in `X-CSRF-Token` on every non-GET, adds `Idempotency-Key` on POST, and on a 401 calls `/auth/refresh` once and retries. Never store tokens in JS or localStorage.
+- Every state-changing claim call sends `expected_version`; handle 409 `CLAIM_VERSION_CONFLICT` by reloading.
+- Money is integer paise in the API; format only for display (`utils/formatMoney.js`).
+- The backend is the authority for policy and permissions. `utils/policyCheck.js` is advisory only (rules from `GET /policy/active`); the approval route comes from `POST /claims/{id}/policy-preview`.
+- Server state via TanStack Query; no other global store.
+- Accessibility: real buttons/links/labels, keyboard support, WCAG 2.2 AA contrast.
+- Pages adapt at 992px (`useIsDesktop`): sidebar layout on laptops, phone layout below.
 
 ## Don'ts
 
-- Never edit `src/shared/api-client/generated/`.
-- No `any`, `@ts-ignore`, non-null assertions, or `dangerouslySetInnerHTML`.
-- No hand-written `fetch` to the backend; no tokens in `localStorage`.
-- No imports from `backend/`, and no imports from a feature's internals.
+- No mock data in `src/`; no direct `fetch` outside `api/httpClient.js`.
+- No imports from `backend/`.
+- No `dangerouslySetInnerHTML`.
